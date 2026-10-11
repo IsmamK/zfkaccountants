@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useAdmin } from "@/components/cms/AdminProvider";
-import { useCmsInitial } from "@/components/cms/CmsDataProvider";
+import { useCmsInitial, useCmsShared } from "@/components/cms/CmsDataProvider";
 import { FloatingTools, PLACE, useFloating } from "@/components/cms/floating";
 import { createInline } from "@/components/cms/inline";
 import { API, apiRequest, isEmpty, mergeDefaults, setPath } from "@/lib/api";
@@ -32,7 +32,8 @@ import { HIDDEN_KEY, isHidden, stripHidden } from "@/lib/visibility";
                       ("items[].icon": { type: "select", options: [...] })
    options.afterSave(data)  runs after this block is published
    options.excludeFromKeywordAudit  shared copy (header, footer, site-wide CTA)
-                      excluded from page keyword score and whole-page AI assist
+                      excluded from page keyword score and whole-page AI assist.
+                      Automatic for every name in a <CmsSection shared names>.
    options.buttonPosition   classes placing the "All fields" pill
    options.hideable         false for blocks that hold shared labels rather
                             than a visible section (no "Hide" toggle)
@@ -166,13 +167,16 @@ export function useCms(name, defaults, options = {}) {
 
     /* ---------- inline primitives ---------- */
     const label = options.label || name;
-    stateRef.current = { data: visible, editMode, update, defaults, label, block: name };
+    // Shared blocks (a <CmsSection shared> name, or the option) stay out of
+    // the page's keyword score and whole-page AI assist.
+    const sharedBlock = useCmsShared(name);
+    const excludeFromKeywordAudit = Boolean(options.excludeFromKeywordAudit) || sharedBlock;
+    stateRef.current = { data: visible, editMode, update, defaults, label, block: name, shared: excludeFromKeywordAudit };
     const [E] = useState(() => createInline(stateRef));
 
     /* ---------- registry (admin bar, AI assist, panels) ---------- */
     const fields = options.fields;
     const afterSave = options.afterSave;
-    const excludeFromKeywordAudit = Boolean(options.excludeFromKeywordAudit);
 
     useEffect(() => {
         if (!isAdmin) return undefined;

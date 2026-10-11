@@ -36,6 +36,7 @@ from .dynamic_pages import (
     SINGLE_IMAGE_SECTION_TYPES,
 )
 from .keywords import section_coverage
+from .text_budget import LENGTH_GUIDE, budget_lines
 
 SEARCH_INTENTS = ("informational", "commercial", "transactional", "navigational", "local")
 
@@ -118,6 +119,8 @@ RULE_PLAIN = ("Text is plain: no HTML, no markdown, paragraphs separated by a bl
 RULE_LINKS = ("Internal links point only to pages listed under INTERNAL LINKS, sit inside \"content\" fields or \"*_href\" "
               "fields, and every anchor names the target's topic (no \"click here\" / \"read more\").")
 RULE_VOICE = "The copy matches the brand voice and spelling conventions stated above."
+RULE_LENGTH = ("Every text field is within its character limit under TEXT LENGTH — a heading stays one line, "
+               "a button stays a few words, and no field is padded to look thorough.")
 
 
 def link_block(path=None):
@@ -446,6 +449,13 @@ Each section object is {{"type": "<type>", …its fields at the top level…}} �
 
 # --------------------------------------------------------------- one section
 
+def _length_block(blocks):
+    """TEXT LENGTH guidance plus each field's character limit, so rewritten
+    copy fits the space the design gives it (api/text_budget.py)."""
+    lines = budget_lines(blocks)
+    return f"{LENGTH_GUIDE}\n{lines}\n\n" if lines else ""
+
+
 def section_prompt(*, content, section_type="", label="", path="", page_type="", host_kind="",
                    fields=None, keyword="", strategy="expand", instruction="", existing_media=None):
     """Rewrite ONE section/component. `fields` is its field contract
@@ -477,6 +487,7 @@ def section_prompt(*, content, section_type="", label="", path="", page_type="",
         + (f"Primary keyword to work in naturally: {keyword}\n\n" if keyword else "")
         + (f"CHANGE REQUESTED: {instruction}\n\n" if instruction else "")
         + strategy_text + "\n\n"
+        + _length_block({"this block": content or {}})
         + link_block(path) + SEO_PRINCIPLES + "\n" + ARRAY_RULE + "\n\n"
         "OUTPUT FORMAT — return ONLY this block's content object: the exact same keys and nesting as "
         "CURRENT CONTENT (keep fields you did not change), NOT wrapped in another key, NOT the whole page. "
@@ -485,7 +496,7 @@ def section_prompt(*, content, section_type="", label="", path="", page_type="",
             RULE_JSON,
             "The reply has the SAME keys and nesting as CURRENT CONTENT — no new top-level keys, no wrapper key, every unchanged field kept.",
             RULE_ARRAYS, RULE_KEYWORD if keyword else "The copy stays on this block's topic.",
-            RULE_FACTS, RULE_PLAIN, RULE_URLS, RULE_LINKS, RULE_VOICE,
+            RULE_LENGTH, RULE_FACTS, RULE_PLAIN, RULE_URLS, RULE_LINKS, RULE_VOICE,
         )
     )
 
@@ -527,7 +538,7 @@ def page_assist_prompt(*, path, sections, seo=None):
         'Each block maps DIRECTLY to its content object, with every field it had (unchanged fields kept) — never {"label": …, "content": …}.',
         ("Every block listed as NOT mentioning the keyword now mentions it (or the reply explains in one line why that block cannot)." if keyword and missing else RULE_KEYWORD),
         "Thin or empty lists the block's purpose needs were filled with real, specific entries.",
-        RULE_ARRAYS, RULE_FACTS, RULE_PLAIN, RULE_URLS, RULE_LINKS, RULE_VOICE,
+        RULE_LENGTH, RULE_ARRAYS, RULE_FACTS, RULE_PLAIN, RULE_URLS, RULE_LINKS, RULE_VOICE,
     )
     prompt = f"""You are auditing and improving every editable block on the {describe_page_kind(path, site=site)} at {_where(path)}.
 {f'Primary keyword: "{keyword}".' if keyword else ""}{f" Secondary keywords: {secondary}." if secondary else ""}{f' SEO title: "{seo.get("seoTitle")}".' if seo.get("seoTitle") else ""}
@@ -545,7 +556,7 @@ Check every block for TWO separate problems:
 
 Fix only what each block needs. Change copy, not structure — except adding entries to a thin list.
 
-{link_block(path)}{SEO_PRINCIPLES}
+{_length_block({sid: e["content"] for sid, e in payload.items()})}{link_block(path)}{SEO_PRINCIPLES}
 {ARRAY_RULE}
 
 OUTPUT FORMAT — a JSON object containing ONLY the blocks you changed, keyed by block id, each mapped DIRECTLY to that block's full content object (same keys and nesting as its "content" above — not wrapped in {{"label","content"}}). Omit blocks you left alone. If nothing needs changing, return {{}}. {JSON_ONLY}

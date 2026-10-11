@@ -290,9 +290,15 @@ Every rule is a MUST. Rule numbers are referenced throughout this file.
   `prompts.seo_rule_checks`). The whole-page assist builds its prompt on open,
   shows KEYWORD COVERAGE (%, sentence, a chip per section) and OTHER SEO
   RULES (6 ✓/✕), stays live after Apply, and covers CMS-page sections.
-  Shared blocks pass `excludeFromKeywordAudit: true`; they are excluded from
-  keyword coverage, whole-page AI prompts, and whole-page Apply. Header,
-  footer, site-wide CTA, shared forms, and cookie banner must carry this flag.
+  Shared blocks are excluded from keyword coverage (not counted and not
+  shown as chips), whole-page AI prompts, and whole-page Apply. A block is
+  shared when a `<CmsSection shared names>` lists it — every layout's
+  `CmsSection` (header, footer, site-wide CTA, shared forms) and every
+  template's (article labels) is `shared` — or when it passes
+  `excludeFromKeywordAudit: true` (blocks outside a shared `CmsSection`,
+  such as the cookie banner). The whole-page and section prompts give a
+  character limit per text field (from its current length, so copy keeps
+  fitting the design), and Apply lists any field still longer than that.
 - **Never:** a rebuilt or "simplified" panel; Ask AI not first; fewer checks;
   coverage that is stale after Apply.
 - **Proven by:** acceptance "SEO panel opens on Ask AI…", "every SEO check is
@@ -1056,9 +1062,11 @@ step is mandatory):
 
 1. `useCms(name, defaults, { label })`. `name` is kebab-case, unique, and
    descriptive (`home-hero`, `services-process`, `footer`). `defaults` is
-   module-level. Shared blocks (header, footer, site-wide CTA) pass
-   `excludeFromKeywordAudit: true`. This also protects shared copy from
-   whole-page AI assist; admins can still edit it directly.
+   module-level. Shared blocks (header, footer, site-wide CTA, article
+   template labels) are listed in a `<CmsSection shared names>` (the
+   layout's or template's), or pass `excludeFromKeywordAudit: true`. Either
+   keeps them out of the page's keyword score and whole-page AI assist;
+   admins can still edit them directly.
 2. **Every** visible string → `<E.Text path>`. Text with line breaks →
    `multiline`. Split styled fragments into separate keys (`title` +
    `titleHighlight`). Never leave literal copy in JSX. `check:inline` enforces
@@ -1080,7 +1088,8 @@ step is mandatory):
    Never use a bare `E` in a function that didn't receive it.
 8. Wrap server pages in `<CmsSection names={["pricing", …]}>`
    (`components/cms/CmsSection.jsx`), so visitors get server-rendered published
-   content with no client fetch (R8).
+   content with no client fetch (R8). A layout or template that renders the
+   same blocks on many pages uses `<CmsSection shared names={["header", "footer", …]}>`.
 9. Hard-coded arrays (icons and similar) stay in code. Only the copy moves into
    `defaults`. Pick an icon by index or with a `fields` select hint
    (`options.fields["plans[].icon"] = { type: "select", options: [...] }`).
@@ -1336,7 +1345,7 @@ same body when the database connection succeeds, or HTTP 503 with
 | POST | `ai/page-assist-prompt/` | admin | Body `{path, sections:{id:{label,content,excludeFromKeywordAudit?}}}` → `{prompt, audit}` |
 | POST | `ai/seo-prompt/` | admin | Body `{path, page_text?}` → `{prompt, checks}` |
 | POST | `ai/keyword-prompt/` | admin | Body `{path, page_text?, <brief>}` → `{prompt}` |
-| POST | `ai/normalize/` | admin | Body `{kind: section\|page_assist\|seo\|keywords\|page, raw, current?, path?}` |
+| POST | `ai/normalize/` | admin | Body `{kind: section\|page_assist\|seo\|keywords\|page, raw, current?, path?}` → page_assist: `{applied, unmatched, warnings, tooLong:[{block,path,length,max}]}` |
 | GET | `ai/copy-structure-prompt/` | admin | Copy-structure prompt |
 
 `<brief>` = `keyword, intent, location, audience, supporting, cta`.

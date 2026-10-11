@@ -89,6 +89,7 @@ function PageAssistDrawer({ onClose }) {
     const [error, setError] = useState("");
     const [result, setResult] = useState("");
     const [warnings, setWarnings] = useState("");
+    const [lengthWarnings, setLengthWarnings] = useState("");
     // Shared blocks belong to every page and must never be rewritten by page assist.
     const blocks = Object.values(editables).filter((e) => !e.hidden && !e.excludeFromKeywordAudit);
     const built = useRef(false);
@@ -128,6 +129,7 @@ function PageAssistDrawer({ onClose }) {
         setError("");
         setResult("");
         setWarnings("");
+        setLengthWarnings("");
         try {
             const current = Object.fromEntries(blocks.map((e) => [e.name, e.data]));
             const data = await apiRequest("ai/normalize/", { method: "POST", body: { kind: "page_assist", raw, current } });
@@ -148,6 +150,12 @@ function PageAssistDrawer({ onClose }) {
                     (data.unmatched.length ? `\nIgnored unknown ids: ${data.unmatched.join(", ")}.` : "")
             );
             setWarnings(data.warnings.join("\n"));
+            setLengthWarnings(
+                (data.tooLong || [])
+                    .filter((w) => allowed.has(w.block))
+                    .map((w) => `${editables[w.block]?.label || w.block} → ${w.path}: ${w.length} characters (fits about ${w.max})`)
+                    .join("\n")
+            );
             return true;
         } catch (err) {
             setError(err.message);
@@ -159,7 +167,7 @@ function PageAssistDrawer({ onClose }) {
         <Drawer open title="◆ Whole-page AI assist" subtitle={`${blocks.length} editable section${blocks.length === 1 ? "" : "s"} on /${path === "home" ? "" : path}`} onClose={onClose} width={560}>
             <div className="space-y-4" data-cms-panel="page-assist">
                 <p className="text-[13px] leading-5 text-[#475569]">
-                    One prompt covers every editable section on this page. Paste the AI&apos;s reply back once and it fans out to each section&apos;s own draft automatically — no per-section copy/paste.
+                    One prompt covers every section that belongs to this page (shared header, footer and site-wide blocks are left alone). Paste the AI&apos;s reply back once and it fans out to each section&apos;s own draft automatically — no per-section copy/paste.
                 </p>
 
                 {!blocks.length ? (
@@ -171,6 +179,8 @@ function PageAssistDrawer({ onClose }) {
                 <Notice tone="error">{error}</Notice>
                 <Notice tone="success">{result}</Notice>
                 <Notice tone="warning">{warnings ? `⚠ Blocked likely data loss:\n${warnings}` : ""}</Notice>
+
+                <Notice tone="warning">{lengthWarnings ? `⚠ Longer than the design fits — shorten these on the page:\n${lengthWarnings}` : ""}</Notice>
 
                 {busy && !prompt ? <p className="text-[12px] text-[#64748B]">Building the prompt…</p> : null}
                 {prompt ? (
@@ -189,6 +199,9 @@ function PageAssistDrawer({ onClose }) {
 
 function CoverageCard({ coverage, rules, failingRules, onOpenSeo }) {
     const { keyword, percent, withKeyword, total, rows } = coverage;
+    // Shared blocks (header, footer, site-wide CTA…) never affect this page's score.
+    const counted = rows.filter((r) => !r.excluded);
+    const shared = rows.filter((r) => r.excluded);
     return (
         <div className="space-y-3 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-4" data-cms-coverage>
             <div className="flex items-center justify-between gap-2">
@@ -205,25 +218,25 @@ function CoverageCard({ coverage, rules, failingRules, onOpenSeo }) {
                     : "Set a primary keyword in this page's SEO (Ask AI → Find keywords can choose one) to see per-section coverage."}
             </p>
             <div className="flex flex-wrap gap-1.5">
-                {rows.map((r) => (
+                {counted.map((r) => (
                     <span
                         key={r.id}
-                        data-cms-coverage-chip={r.hasKeyword ? "yes" : r.excluded ? "shared" : "no"}
-                        title={r.excluded ? "Shared across pages — not counted" : r.hasKeyword ? `Contains “${keyword}”` : keyword ? `Does not contain “${keyword}”` : ""}
+                        data-cms-coverage-chip={r.hasKeyword ? "yes" : "no"}
+                        title={r.hasKeyword ? `Contains “${keyword}”` : keyword ? `Does not contain “${keyword}”` : ""}
                         className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.02em] ${
-                            r.excluded
-                                ? "border-dashed border-[#CBD5E1] text-[#64748B]"
-                                : r.hasKeyword
-                                  ? "border-[#86EFAC] bg-[#F0FDF4] text-[#15803D]"
-                                  : "border-[#E2E8F0] bg-white text-[#64748B]"
+                            r.hasKeyword ? "border-[#86EFAC] bg-[#F0FDF4] text-[#15803D]" : "border-[#E2E8F0] bg-white text-[#64748B]"
                         }`}
                     >
-                        {r.hasKeyword && !r.excluded ? <span aria-hidden="true">✓</span> : null}
+                        {r.hasKeyword ? <span aria-hidden="true">✓</span> : null}
                         {r.label}
-                        {r.excluded ? " · shared" : ""}
                     </span>
                 ))}
             </div>
+            {shared.length ? (
+                <p data-cms-coverage-shared className="text-[11px] leading-4 text-[#64748B]">
+                    Not counted or rewritten here (shared by many pages, edit them directly): {shared.map((r) => r.label).join(", ")}.
+                </p>
+            ) : null}
 
             {rules.length ? (
                 <div className="space-y-1.5 border-t border-[#E2E8F0] pt-3">

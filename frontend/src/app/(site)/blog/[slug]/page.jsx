@@ -104,7 +104,7 @@ export default async function BlogArticle({ params }) {
 
     return (
 
-        <CmsSection names={["blog-template"]}>
+        <CmsSection shared names={["blog-template"]}>
 
             <ArticleHero
                 article={article}

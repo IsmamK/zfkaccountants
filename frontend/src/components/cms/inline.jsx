@@ -21,7 +21,8 @@ import { FloatingTools, PLACE, useFloating } from "@/components/cms/floating";
      <E.Link path="buttonHref" />            edit a link's URL
 
    Every editable span carries data-cms-block (the useCms name, or
-   "section:<id>") and data-cms-path — a stable hook for tests and tooling.
+   "section:<id>") and data-cms-path — a stable hook for tests and tooling —
+   plus data-cms-shared on blocks shared by many pages (header, footer…).
 
    For visitors (and admins with editing off) every
    primitive renders exactly the original output —
@@ -90,7 +91,22 @@ function placeCaret(node, offset) {
     selection.addRange(range);
 }
 
-function EditableSpan({ value, multiline, placeholder, label, block, path, onChange }) {
+// The typed text, not the rendered text: innerText applies CSS such as
+// text-transform: uppercase, which would save an eyebrow in capitals.
+function plainText(node) {
+    let out = "";
+    node.childNodes.forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) out += child.nodeValue;
+        else if (child.nodeName === "BR") out += "\n";
+        else {
+            if (out && !out.endsWith("\n")) out += "\n";
+            out += plainText(child);
+        }
+    });
+    return out.replace(/\u00a0/g, " ");
+}
+
+function EditableSpan({ value, multiline, placeholder, label, block, shared, path, onChange }) {
     const ref = useRef(null);
     const focused = useRef(false);
     const start = useRef(value);
@@ -99,7 +115,7 @@ function EditableSpan({ value, multiline, placeholder, label, block, path, onCha
     // Uncontrolled while focused, so the caret never jumps.
     useLayoutEffect(() => {
         const node = ref.current;
-        if (node && !focused.current && node.innerText !== value) node.innerText = value;
+        if (node && !focused.current && plainText(node) !== value) node.innerText = value;
     }, [value]);
 
     // Re-mounted mid-edit? Take focus back (runs after the text is set above).
@@ -121,7 +137,7 @@ function EditableSpan({ value, multiline, placeholder, label, block, path, onCha
     }, [id]);
 
     const read = (node) => {
-        const text = node.innerText.replace(/\n$/, "");
+        const text = plainText(node).replace(/\n$/, "");
         return multiline ? text : text.replace(/\s*\n\s*/g, " ");
     };
 
@@ -137,6 +153,7 @@ function EditableSpan({ value, multiline, placeholder, label, block, path, onCha
             data-placeholder={placeholder}
             data-cms-block={block}
             data-cms-path={path}
+            data-cms-shared={shared || undefined}
             className="cms-editable"
             style={multiline ? { whiteSpace: "pre-line" } : undefined}
             onFocus={() => {
@@ -183,7 +200,7 @@ function EditableSpan({ value, multiline, placeholder, label, block, path, onCha
 
 export function createInline(stateRef) {
     function Text({ path, multiline = false, placeholder = "Add text…" }) {
-        const { data, editMode, label, block } = stateRef.current;
+        const { data, editMode, label, block, shared } = stateRef.current;
         const raw = getPath(data, path);
         const value = raw === undefined || raw === null ? "" : String(raw);
         if (!editMode) return multiline && value.includes("\n") ? lines(value) : value;
@@ -194,6 +211,7 @@ export function createInline(stateRef) {
                 placeholder={placeholder}
                 label={`${label}: ${path}`}
                 block={block}
+                shared={shared}
                 path={path}
                 onChange={(next) => {
                     if (next !== String(getPath(stateRef.current.data, path) ?? "")) stateRef.current.update(path, next);

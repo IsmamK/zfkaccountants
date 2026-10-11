@@ -1461,6 +1461,15 @@ class AiNormalizeTests(AdminAuthMixin, APITestCase):
         r = self.post({"kind": "page_assist", "raw": raw, "current": {"hero": {"title": "Old", "sub": "s"}}})
         self.assertEqual(r.data["applied"], {"hero": {"title": "Better", "sub": "s"}})
         self.assertEqual(r.data["unmatched"], ["ghost"])
+        self.assertEqual(r.data["tooLong"], [])
+
+    def test_page_assist_flags_text_longer_than_the_design_fits(self):
+        current = {"hero": {"title": "VAT returns for Leeds firms", "href": "/contact",
+                            "items": [{"title": "Fast"}, {"title": "Fixed scope"}]}}
+        raw = ('{"hero": {"title": "' + "Very long heading " * 6 + '", "href": "/a-much-longer-internal-path-here",'
+               ' "items": [{"title": "Fast"}, {"title": "Fixed scope"}]}}')
+        r = self.post({"kind": "page_assist", "raw": raw, "current": current})
+        self.assertEqual([(f["block"], f["path"], f["max"]) for f in r.data["tooLong"]], [("hero", "title", 40)])
 
     def test_seo_flat_keys_map_to_pageseo_shape(self):
         raw = ('Audit text...\n```json\n{"seoTitle": "VAT Returns | Acme", "primaryKeyword": "vat returns", '
@@ -1543,6 +1552,9 @@ class AiPromptTests(AdminAuthMixin, APITestCase):
         self.assertEqual(r.data["audit"]["total"], 2)
         self.assertIn("faq (FAQ)", r.data["prompt"])
         self.assertNotIn('"footer"', r.data["prompt"])
+        self.assertIn("TEXT LENGTH", r.data["prompt"])
+        self.assertIn("- hero: title ≤ 40", r.data["prompt"])
+        self.assertIn("Every text field is within its character limit", r.data["prompt"])
         self.assertEqual(self.admin_client.post("/api/ai/page-assist-prompt/", {"sections": {}}, format="json").status_code, 400)
 
     def test_seo_and_keyword_prompts(self):

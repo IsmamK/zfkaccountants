@@ -10,12 +10,15 @@ admin UI sends its text to POST ai/normalize/ and applies only what comes back:
 - deep-merges onto the current content, so a field the AI omitted is kept
 - refuses to shrink an existing list of 3+ items (a classic AI truncation
   failure) and keeps the original, with a warning the admin sees
+- flags whole-page assist text longer than the design fits (tooLong)
 - maps the flat SEO keys the seo/keyword prompts ask for onto PageSEO's
   nested shape
 """
 
 import json
 import re
+
+from .text_budget import too_long
 
 ARRAY_SHRINK_GUARD_MIN_LENGTH = 3
 
@@ -125,7 +128,7 @@ def normalize_page_assist(raw, current):
     if not isinstance(parsed, dict):
         raise NormalizeError("Expected a JSON object keyed by block id.")
     current = current or {}
-    applied, unmatched, warnings = {}, [], []
+    applied, unmatched, warnings, long_fields = {}, [], [], []
     for block_id, value in parsed.items():
         if block_id not in current:
             unmatched.append(block_id)
@@ -133,7 +136,8 @@ def normalize_page_assist(raw, current):
         block_warnings = []
         applied[block_id] = guarded_merge(current[block_id] or {}, unwrap_content(value), block_warnings)
         warnings.extend(f"{block_id}: {w}" for w in block_warnings)
-    return {"applied": applied, "unmatched": unmatched, "warnings": warnings}
+        long_fields.extend({"block": block_id, **f} for f in too_long(current[block_id], applied[block_id]))
+    return {"applied": applied, "unmatched": unmatched, "warnings": warnings, "tooLong": long_fields}
 
 
 _SEO_FIELD_PATCH = {

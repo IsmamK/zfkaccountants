@@ -159,7 +159,8 @@ try {
 
     /* ---------- 3. True inline editing -> draft autosave ---------- */
     await ensureEditing();
-    const candidates = page.locator('[data-cms-block]:not([data-cms-block^="section:"])');
+    // A page-specific block: shared ones (header, footer…) are left out of whole-page assist.
+    const candidates = page.locator('[data-cms-block]:not([data-cms-block^="section:"]):not([data-cms-shared])');
     await candidates.first().waitFor({ timeout: 10000 });
     let target = null;
     for (let i = 0; i < (await candidates.count()) && !target; i++) {
@@ -201,6 +202,10 @@ try {
     const promptText = await prompt.inputValue();
     check("opening AI assist builds the prompt (no extra click)", promptText.length > 500 && promptText.includes(block), `${promptText.length} chars`);
     check("prompt restates its rules at the end (FINAL CHECK)", promptText.slice(-2500).includes("FINAL CHECK"));
+    const sharedBlocks = await page.locator("[data-cms-shared]").evaluateAll((els) => [...new Set(els.map((e) => e.dataset.cmsBlock))]);
+    check("shared blocks (header, footer…) are marked and left out of whole-page assist",
+        sharedBlocks.length > 0 && sharedBlocks.every((b) => !promptText.includes(`"${b}": {`)), sharedBlocks.join(", ") || "no data-cms-shared block on the page");
+    check("prompt sets a character limit per text field (TEXT LENGTH)", promptText.includes("TEXT LENGTH") && promptText.includes(`- ${block}: `));
     check("keyword coverage card shows a percentage", (await dialog5.locator("[data-cms-coverage-percent]").getAttribute("data-cms-coverage-percent")) === "0");
     check("“Other SEO rules” list is always shown (6 rules)", (await dialog5.locator("[data-cms-rule]").count()) === 6);
     const reply = `Here you go!\n\n\`\`\`json\n${JSON.stringify({ [block]: { content: { [field]: `${STAMP} ai [link](https://example.com) ok ${KW}` } } })}\n\`\`\`\nAnything else?`;

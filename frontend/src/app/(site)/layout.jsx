@@ -8,7 +8,7 @@ export default function SiteLayout({ children }) {
 
     return (
 
-        <CmsSection names={["header", "footer", "cta-section", "form-quote"]}>
+        <CmsSection shared names={["header", "footer", "cta-section", "form-quote"]}>
 
             <Header />
 
