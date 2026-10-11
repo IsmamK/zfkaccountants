@@ -67,7 +67,8 @@ class Command(BaseCommand):
         with transaction.atomic():
             site, _ = SiteSettings.objects.select_for_update().get_or_create(pk=1, defaults={"data": {}})
             current = site.data or {}
-            if int(current.get(SEED_MARKER) or 0) >= version:
+            previous_version = int(current.get(SEED_MARKER) or 0)
+            if previous_version >= version:
                 self.stdout.write(f"CMS defaults already installed (version {version}); kept all existing data.")
                 return
             had_plan = isinstance((current.get("analytics") or {}).get("plan"), dict)
@@ -78,7 +79,15 @@ class Command(BaseCommand):
             site.data[SEED_MARKER] = version
             site.save()
 
-            ComponentData.objects.get_or_create(name="form-quote", defaults={"data": manifest["form"]})
+            form, created = ComponentData.objects.get_or_create(
+                name="form-quote", defaults={"data": manifest["form"]}
+            )
+            repaired_form = not created and not (form.data or {})
+            if repaired_form:
+                # An empty placeholder can be created by the CMS before the
+                # first seed. Keep any non-empty administrator definition.
+                form.data = deepcopy(manifest["form"])
+                form.save()
 
             for path_name, data in manifest["pageSeo"].items():
                 row, created = PageSEO.objects.get_or_create(path=path_name, defaults={"data": data})
@@ -125,14 +134,23 @@ class Command(BaseCommand):
                 "data": clean_scan(manifest["scan"]), "scanned_at": timezone.now(), "source": "seed",
             })
 
-            if not had_plan:
+            old_plan = get_plan()
+            conversions = old_plan.get("conversions") or []
+            repair_seeded_plan = (
+                previous_version == 1 and repaired_form and had_plan
+                and old_plan.get("status") == "approved" and old_plan.get("version") == 1
+                and bool(conversions)
+                and all(c.get("createdBy") == "library" and not c.get("locked") for c in conversions)
+                and not any((c.get("trigger") or {}).get("event") == "generate_lead" for c in conversions)
+            )
+            if not had_plan or repair_seeded_plan:
                 facts = get_facts()
                 proposal = build_plan(facts)
                 clean, report = validate(proposal, facts)
                 if report["errors"] or report["dangling"] or not clean["conversions"]:
                     raise CommandError(f"Could not seed tracking plan: {report}")
                 clean["status"] = "approved"
-                clean["version"] = 1
+                clean["version"] = 2 if repair_seeded_plan else 1
                 clean["facts"] = {"hash": facts["hash"], "at": timezone.now().isoformat()}
                 save_plan(clean)
 

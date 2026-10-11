@@ -9,6 +9,10 @@
   intentional deletions. Future default-content changes require a new seed
   version or explicit data migration. The PostgreSQL bind mount preserves data
   across image updates and schema migrations.
+- Seed v2 fills an existing empty `form-quote` published row before building
+  the plan. It repairs the original v1 library plan only if that plan is still
+  approved at version 1 and has no lead conversions. Existing form drafts and
+  owner-edited plans are preserved.
 
 # Upgrade Notes — security: Django 5.2 LTS, patched dependencies, a dependencies gate
 

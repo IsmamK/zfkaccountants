@@ -382,7 +382,7 @@ async function main() {
     if (exportJson) {
         const form = readJson("src/data/quote-form.json");
         const manifest = {
-            version: 1,
+            version: 2,
             settings: await seedSettings(),
             form,
             pageSeo: await seedPageSeo(),

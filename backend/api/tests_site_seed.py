@@ -13,7 +13,7 @@ from .tracking_plan import get_plan
 
 
 MANIFEST = {
-    "version": 1,
+    "version": 2,
     "settings": {
         "organization": {"name": "Example Accountants"},
         "seoDefaults": {"siteUrl": "http://localhost:3000", "locale": "en_GB"},
@@ -52,7 +52,7 @@ class SiteSeedTests(TestCase):
         self.seed()
         site = SiteSettings.objects.get(pk=1).data
         self.assertEqual(site["seoDefaults"]["siteUrl"], "https://example.test")
-        self.assertEqual(site["_deployment_seed_version"], 1)
+        self.assertEqual(site["_deployment_seed_version"], 2)
         self.assertEqual(ComponentData.objects.get(name="form-quote").data, MANIFEST["form"])
         self.assertTrue(ContentPage.objects.get(path="services/payroll").sections.exists())
         self.assertTrue(TrackingScan.objects.filter(pk=1).exists())
@@ -85,12 +85,40 @@ class SiteSeedTests(TestCase):
         self.assertEqual(data["contact"]["email"], "")
         self.assertEqual(data["seoDefaults"]["siteUrl"], "https://example.test")
 
+    def test_empty_form_placeholder_is_filled_before_building_lead_conversions(self):
+        ComponentData.objects.create(name="form-quote", data={})
+        self.seed()
+        self.assertEqual(ComponentData.objects.get(name="form-quote").data, MANIFEST["form"])
+        self.assertTrue(any(c["trigger"]["event"] == "generate_lead" for c in get_plan()["conversions"]))
+
+    def test_repairs_only_the_original_seeded_plan_after_empty_form_bug(self):
+        self.seed()
+        form = ComponentData.objects.get(name="form-quote")
+        form.data = {}
+        form.save()
+        site = SiteSettings.objects.get(pk=1)
+        site.data["_deployment_seed_version"] = 1
+        old = site.data["analytics"]["plan"]
+        old["conversions"] = [c for c in old["conversions"] if c["trigger"]["event"] != "generate_lead"]
+        old["version"] = 1
+        site.save()
+
+        self.seed()
+
+        self.assertEqual(SiteSettings.objects.get(pk=1).data["_deployment_seed_version"], 2)
+        self.assertEqual(ComponentData.objects.get(name="form-quote").data, MANIFEST["form"])
+        self.assertEqual(get_plan()["version"], 2)
+        self.assertTrue(any(c["trigger"]["event"] == "generate_lead" for c in get_plan()["conversions"]))
+
     def test_full_export_installs_the_sites_baseline_plan(self):
         manifest = Path(settings.BASE_DIR) / "api" / "site_seed.json"
         if not manifest.is_file():
             self.skipTest("CI generates the full frontend seed manifest before running tests")
+        ComponentData.objects.create(name="form-quote", data={}, draft_data={"fields": [{"name": "draft-only"}]}, status="draft")
         call_command("seed_site_defaults", manifest=manifest, verbosity=0)
         self.assertEqual(BlogPost.objects.count(), 6)
         self.assertEqual(ContentPage.objects.count(), 5)
+        self.assertEqual(len(ComponentData.objects.get(name="form-quote").data["fields"]), 9)
+        self.assertEqual(ComponentData.objects.get(name="form-quote").draft_data["fields"][0]["name"], "draft-only")
         self.assertEqual(get_plan()["status"], "approved")
         self.assertEqual(len(get_plan()["conversions"]), 16)
