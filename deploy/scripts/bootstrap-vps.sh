@@ -5,7 +5,7 @@ ROOT=/opt/zfkaccountants
 owner=$(id -un)
 group=$(id -gn)
 sudo install -d -m 755 -o "$owner" -g "$group" "$ROOT"
-for path in compose env nginx scripts systemd data data/postgres data/media data/static acme acme/.well-known acme/.well-known/acme-challenge backups; do
+for path in compose env nginx certbot scripts systemd data data/postgres data/media data/static acme acme/.well-known acme/.well-known/acme-challenge backups; do
   if [[ ! -d "$ROOT/$path" ]]; then install -d -m 755 "$ROOT/$path"; fi
 done
 chmod 700 "$ROOT/env" "$ROOT/backups"

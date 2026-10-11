@@ -21,3 +21,5 @@ Push to `production` or run the workflow manually. The workflow builds changed i
 ## Backups
 
 `backup.sh` makes a compressed PostgreSQL dump and media archive in `/opt/zfkaccountants/backups`, retaining 14 days. The workflow installs a project-specific daily systemd timer after the first successful release. These backups share the same VPS and therefore do not protect against total server loss; copy them to independent storage as part of a disaster recovery plan.
+
+The workflow also installs a Certbot deploy hook that validates and reloads Nginx only when the `zfkaccountants.com` certificate renews.
