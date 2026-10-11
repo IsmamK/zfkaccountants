@@ -1,4 +1,16 @@
-# dynamic-cms is its own repository (github main branch)
-/dynamic-cms/
 .DS_Store
 .gates/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated files
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.sqlite3-*

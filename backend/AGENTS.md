@@ -1,0 +1,192 @@
+# Instructions for coding agents (Claude, Codex, Cursor, …)
+
+This directory is the CMS backend within **zfkaccountants**:
+- a Django backend (`api/`, `backend/`)
+- a Next.js frontend kit (`frontend-kit/`)
+- the contract between them (`FRONTEND_INTEGRATION_PROMPT.md`)
+
+Decide which job you have, then follow that section exactly. Don't ask for
+instructions the docs already answer.
+
+## Job A — "Integrate this CMS into <frontend>"
+
+1. Read `FRONTEND_INTEGRATION_PROMPT.md` in full, starting with "How to use
+   this file". Rules R1–R34 are mandatory; each has a rule card (Must / Never
+   / Proven by), a phase that builds it, an anti-pattern and a checklist line.
+2. Read `frontend-kit/MANIFEST.md`. Install the kit verbatim; change only the
+   ADAPT files, and only as the manifest says.
+3. Run the spec's Autonomous mode, phases P0–P8, in order. Convert every
+   section with the §3 recipe.
+4. **You are done only when `frontend-kit/acceptance/run-gates.mjs` prints
+   `ALL GATES GREEN — 3 of 3 passes`.** Nothing else counts. It runs every
+   gate (dependencies, kit-verbatim, check-inline, check-sections, production-build,
+   visual, acceptance, tracking-edge, verify-tracking, seo-baseline,
+   site-audit, report)
+   against the production build and maps the results to R1–R34
+   (`rules-map.json`):
+   - P0: `node frontend-kit/acceptance/visual.mjs --baseline --dir <frontend>/.gates/visual`
+     and `AUDIT_JSON=<frontend>/.gates/seo-baseline.json node frontend-kit/acceptance/site-audit.mjs`
+     BEFORE changing anything (R9 and R34 are measured against them).
+   - P8: `--pass 1` until green → `rm -rf .next`, rebuild, restart, change
+     nothing → `--pass 2` → write `<frontend>/CMS_REPORT.md` (spec §13
+     format: every rule ticked with evidence, the pass-2 fingerprint, the §11
+     sweep, the SEO audit before/after, Defaults taken, Needs from the owner)
+     → `--pass 3 --report …`.
+     Pass 2 and 3 refuse to run if any file changed; any change means pass 1
+     again.
+   - Never weaken a gate, edit a kit CORE file (only ADAPT files and the
+     `cms.css` theme block), edit `rules-map.json` or a check, or delete
+     content to dodge one.
+   Paste the last line of each pass and `.gates/pass-2-rules.md` in your
+   report, plus the launch-check items that need the owner, and point the
+   owner to `LAUNCH_GUIDE.md`. The gates run from `frontend-kit/acceptance`
+   (`npm run setup` once).
+5. Never:
+   - put a token in browser storage
+   - build modal-first editing
+   - write prompt text in the frontend
+   - `JSON.parse` a pasted AI reply
+   - call revalidation from the browser
+   - ship admin UI to visitors
+   - leave a `useCms` component without `if (hidden) return null` (R23)
+   - submit a form any way but `submitForm()` from `lib/forms.js`, or
+     hard-code / invent the recipient (R24 — it's Settings → Form notifications)
+   - hard-code a tracking tag or a search-verification `<meta>`, or call
+     `gtag`/`fbq`/`dataLayer.push` outside `lib/track.js` (R25 — IDs live in
+     Settings → Tracking & analytics, codes in Settings → Search engine
+     verification)
+   - publish a claim the owner hasn't confirmed: stats, ratings, reviews,
+     credentials, "fixed fees" (R26)
+   - hard-code or publish a contact channel the owner didn't approve, or
+     show the form-notification address (R27)
+   - build pages for things the owner doesn't offer, or thin, unlinked
+     entry pages (R28)
+   - mix CTA wordings, ship a form-only contact page, or use slogan-only H1s
+     (R29)
+   - place edit tools in the page flow or inside a section, let the admin bar
+     wrap, or leave a list without `E.Item` + `E.Add` (R30 — tools are
+     floating tools in the admin layer: `components/cms/floating.jsx`)
+   - code conversions or events per site, leave a block without
+     `{editButton}` or a form without `data-cms-form`, put personal data in
+     an event, or ask the owner to set events up inside a tool (R31 — the
+     plan is built in Site tools → Tracking: Scan → Build/Ask AI → Approve →
+     Run checks)
+   - load a marketing tag before consent or store visitor data without it
+     (R32 — `lib/consent.js`, `ConsentBanner`, "Cookie settings")
+   - expose contacts outside admin endpoints, pre-tick a marketing opt-in or
+     add people who didn't opt in to ad lists (R33)
+   - leave a page orphaned, buried (>3 clicks) or reachable only through
+     menus, use "read more"/"click here" anchors, link to a redirected URL,
+     or skip the P0 SEO baseline (R34 — Site tools → SEO → Internal links;
+     inline links are `[anchor](/path)` in a section's `content`)
+
+## Job B — Change the backend
+
+- **Python:** always `./venv/bin/python` (on macOS a bare `python` usually
+  doesn't exist).
+  - Tests: `./venv/bin/python manage.py test api`
+  - Migrations: `./venv/bin/python manage.py makemigrations api && ./venv/bin/python manage.py migrate`
+  - Staff user: `./venv/bin/python manage.py createsuperuser`
+- **Where things live** (single sources of truth):
+  - All AI prompt text: `api/prompts.py`, built from `SiteSettings.data.ai`.
+    Prompt endpoints: `api/ai_views.py`.
+  - Cleaning pasted AI replies: `api/ai_normalize.py` (`POST ai/normalize/`).
+  - Keyword matching: `api/keywords.py`, mirrored by `frontend-kit/src/lib/keywords.js`.
+    Change both together.
+  - Section types: `SECTION_SCHEMA` in `api/dynamic_pages.py` (placeholder
+    content: `STARTER_CONTENT`). Adding a type also needs a renderer in
+    `frontend-kit/src/components/dynamic/registry.js` plus an adapter.
+  - SEO rules: `prompts.seo_rule_checks`, mirrored id-for-id by
+    `frontend-kit/src/lib/seoChecks.js`. Change both together.
+  - Collections (the only pages admins create from the site):
+    `api/site_collections.py` (config, template fitting, blank entries) and
+    `api/collection_views.py`.
+  - **Prompt-writing rule:** every prompt states its rules, then ends with
+    `final_check(...)`, which repeats the hard constraints as the last thing
+    the model reads. A new prompt without a FINAL CHECK fails
+    `PromptRepetitionTests`.
+  - Drafts: `ComponentData.draft_data`, `DynamicSection.draft_content`, and
+    `api/draft_views.py`.
+  - Cache invalidation: `api/revalidation.py` (signals → signed webhook, and
+    bumps resolver cache versions). Any new public model needs a tag there and
+    the matching tag in `frontend-kit/src/lib/cms.js`.
+  - Auth: session + CSRF (`api/auth_views.py`, `AdminLoginView` with
+    `session: true`). Token login stays for scripts only.
+  - Tracking (R31–R33): vocabulary `api/tracking_vocab.py` (served to the
+    kit by `tracking/config/` — no copy in the frontend); site facts
+    `api/site_facts.py`; conversion library `api/tracking_library.py`; plan
+    validation/runtime/tests/diff `api/tracking_plan.py`; leads
+    `api/tracking_leads.py`; server copies `api/tracking_dispatch.py` +
+    `api/tracking_adapters/` (one module per tool, all HTTP through
+    `base.http_json` so tests mock one function); sync
+    `api/tracking_sync.py`; checks/alerts `api/tracking_verify.py`; contacts
+    `api/contacts.py`; credentials `api/crypto.py` (TRACKING_SECRET_KEY);
+    background work `manage.py tracking_worker`. Tests: `api/tests_tracking.py`.
+  - Internal-link audit (R34): `api/link_audit.py` (one analyser for
+    Site tools → SEO → Internal links, `seo/links/analyze/` used by
+    site-audit, the launch check and `prompts.link_block`). Inline links in
+    body copy: `ai_normalize.LINKABLE_FIELDS` / `INTERNAL_LINK`, mirrored by
+    `frontend-kit/src/components/dynamic/EditableParagraphs.jsx`. Tests:
+    `api/tests_links.py`.
+  - Launch readiness: `api/launch_check.py` (`GET launch-check/`). Anything
+    that silently hurts a live site belongs here as a blocker or warning,
+    and any owner step it asks for is explained in `LAUNCH_GUIDE.md`.
+  - Cascades on delete (PageSEO and sections follow their page): `api/cleanup.py`.
+  - Title assembly (brand never doubled; dropped past 60 chars):
+    `seo_resolve.apply_title_template`.
+  - Rate limits: `api/throttles.py`. Staff and the site's own server
+    (`X-CMS-Frontend` = `REVALIDATE_SECRET`) skip the general limits;
+    `login` and `form_submit` always apply. A new public endpoint with its own
+    `throttle_classes` must use `SiteAwareScopedRateThrottle`.
+- **Dependencies:** keep `requirements.txt` free of known advisories:
+  `pip-audit -r requirements.txt` (in a throwaway venv) after any upgrade
+  and before each release; stay on a supported Django release (LTS).
+- **Every behaviour change ships with a test** in `api/tests.py`. The
+  permission-audit test fails if you add an unauthenticated write endpoint
+  without adding it to `PUBLIC_WRITE_ALLOWLIST` on purpose.
+- **Keep the contract in sync.** A new or changed endpoint, field or settings
+  key must be updated in `FRONTEND_INTEGRATION_PROMPT.md` §6 in the same
+  change. Kit behaviour changes are made in a reference frontend, verified with
+  the acceptance test, then pulled in with
+  `python frontend-kit/sync_kit.py <frontend>`. Never hand-edit
+  `frontend-kit/src` alone.
+- **The kit must work in any project.** After any kit change run
+  `NODE_MODULES=<frontend>/node_modules node frontend-kit/acceptance/fresh-install.mjs`
+  (a blank Next app + the kit + the MANIFEST ADAPT steps must build), and keep
+  the kit, spec, AGENTS and MANIFEST free of any one site's names, services or
+  wording — site specifics live only in the site's own files and CMS data.
+- **Adding or changing a rule in the spec:** keep its five copies in step —
+  the §0.1 index row (with its gate and phase), a §0.2 card with Must / Never
+  / Proven by, the `Rules:` line of the §2 phase that builds it, a §11
+  anti-pattern line and a §13 checklist line ending in its gate. Bump every
+  `R1–Rn` range (spec, AGENTS, READMEs). `IntegrationSpecTests` fails on any
+  gap. Every rule needs an automatic gate AND an entry in
+  `frontend-kit/acceptance/rules-map.json` naming the gate lines that prove
+  it (`IntegrationSpecTests` fails otherwise); "review" is not a gate.
+- Record notable changes in `UPGRADE_NOTES.md`.
+- **Git:** this directory belongs to the root `IsmamK/zfkaccountants` repository.
+  Commit from the project root and push to `main` directly; never create
+  feature branches or pull requests. There is no separate backend repository.
+
+## Product principles (for any new feature)
+
+- **Inline first:** click the thing to change it. Panels exist for bulk, AI,
+  JSON and history. Edit tools appear on hover as floating tools in the admin
+  layer: editing never moves, covers or crowds the page, and the admin bar is
+  always one line.
+  Typing never loses focus (index keys; `check:inline` + acceptance enforce it).
+- **Build only what repeats:** collections (articles, services, projects…)
+  get "＋ New" on their index page, with one template. One-off pages keep
+  their structure.
+- **Draft, then publish;** everything reversible (revisions, SEO history,
+  discard).
+- **AI is a copy/paste loop with any chat model:** the backend writes the
+  prompt with site context, SEO best practice and an exact JSON shape, and
+  `ai/normalize` turns messy replies into safe content (it refuses data loss).
+- **Everything can be hidden** (blocks, list items, sections) as a draft;
+  hidden content never reaches visitors' HTML.
+- **Owner-configurable, not code-configurable:** lead email recipient
+  (FormSubmit.co) and every tracking ID / data layer variable live in Site
+  tools → Settings, near the top, validated by `api/settings_validation.py`.
+- **Visitors pay nothing:** server-rendered published content, no admin code
+  paths.

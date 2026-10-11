@@ -2,7 +2,7 @@
 
 Marketing site for a UK accountancy practice (Next.js 15, React 19, Tailwind 4),
 with content, SEO, blog, forms and redirects managed by the Django CMS in
-`../dynamic-cms`.
+`../backend`.
 
 ```bash
 npm install
@@ -16,7 +16,7 @@ built-in content and the blog falls back to `src/data/articles.js`.
 ## Running the CMS locally
 
 ```bash
-cd ../dynamic-cms
+cd ../backend
 python3.12 -m venv venv && ./venv/bin/pip install -r requirements.txt
 cp .env.example .env          # set SECRET_KEY (an empty value breaks requests)
 ./venv/bin/python manage.py migrate
@@ -99,9 +99,9 @@ Site settings → `ai`, and the collections in Site settings → `collections` (
 | CMS redirects | `src/middleware.js` |
 | Site name | `src/lib/brand.js` |
 
-The CMS kit files are shared with `../dynamic-cms/frontend-kit` (refresh it
-with `python ../dynamic-cms/frontend-kit/sync_kit.py .`). The rules for making
-a section editable are in `../dynamic-cms/FRONTEND_INTEGRATION_PROMPT.md` §3.
+The CMS kit files are shared with `../backend/frontend-kit` (refresh it
+with `python ../backend/frontend-kit/sync_kit.py .`). The rules for making
+a section editable are in `../backend/FRONTEND_INTEGRATION_PROMPT.md` §3.
 In short:
 - move the copy into a module-level `defaults`
 - call `const { data, E, editButton } = useCms("my-section", defaults, { label })`
@@ -117,7 +117,7 @@ npm run check:sections   # renderers match the backend's section types (CMS runn
 ```
 
 End-to-end acceptance (production build + CMS running; see the script header):
-`node ../dynamic-cms/frontend-kit/acceptance/acceptance.mjs`.
+`node ../backend/frontend-kit/acceptance/acceptance.mjs`.
 
 Env: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`, `REVALIDATE_SECRET` (the
 same value as the CMS `.env`; the CMS's `FRONTEND_REVALIDATE_URL` points at

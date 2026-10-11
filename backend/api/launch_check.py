@@ -1,0 +1,322 @@
+"""Launch readiness: everything that silently hurts a live site.
+
+GET launch-check/ (admin) returns {ready, blockers, warnings, items: [...]} where
+each item is {id, level: "blocker"|"warning", label, detail, fix, where?}.
+
+Blockers mean "do not launch": visitors would see placeholder text, leads
+would never reach anyone, search engines would be told to stay away, or the
+site would advertise the wrong domain. The admin dashboard shows this list,
+and frontend-kit/acceptance/site-audit.mjs fails on any blocker.
+"""
+
+import re
+from urllib.parse import urlparse
+
+from django.conf import settings
+
+PLACEHOLDER = re.compile(
+    r"\[(?:insert|registered|company|your|add|todo)[^\]]*\]"   # [Insert …], [Registered Office Address]
+    r"|\b0{4}\s?0{6}\b|\(0\)\s?0{4}"                             # 0000 000000, (0) 0000
+    r"|@example\.(?:com|org|co\.uk)\b|\bexample\.(?:com|co\.uk)\b"
+    r"|lorem ipsum|\bTBD\b|\bTODO\b"
+    r"|\bNew section\b|Write the first paragraph|Describe the offer in one|What it does\b|\bEyebrow\b",
+    re.IGNORECASE,
+)
+# Claims a new business can't usually back up: client counts, ratings,
+# percentages, credentials and price promises. Each must be confirmed by the
+# owner (or removed) before launch — R26.
+CLAIMS = re.compile(
+    r"\b\d{2,}[,\d]*\s?\+(?=\s|$|[^\w])"                               # 250+, 1,000+
+    r"|\b\d(?:\.\d)?\s?/\s?5\b|★{3,}"                                    # 4.9/5, ★★★★★
+    r"|\b\d{2,3}\s?%\s*(?:client|customer|satisf|success|retention)"     # 98% satisfaction
+    r"|\b\d+\+?\s*years?\s+(?:of\s+)?experience"                          # 15 years experience
+    r"|\b(?:trusted|chosen|used)\s+by\s+(?:over\s+)?\d"                    # trusted by 500
+    r"|\bfixed[- ](?:fees?|prices?|pricing)\b"                             # fixed fees
+    r"|\baward[- ]winning\b|\b(?:certified|accredited|chartered)\b",      # credentials
+    re.IGNORECASE,
+)
+EMAIL_LIKE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", ""}
+DEV_EMAIL_BACKENDS = ("console", "locmem", "dummy", "filebased")
+
+
+def _strings(value, path=""):
+    """Every string in a JSON blob, with a readable path. Anything an admin
+    hid (`_hidden: true`) is skipped — visitors never see it."""
+    if isinstance(value, dict) and value.get("_hidden"):
+        return
+    if isinstance(value, str):
+        yield path, value
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _strings(item, f"{path}.{key}" if path else str(key))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            yield from _strings(item, f"{path}[{index}]")
+
+
+def placeholder_hits():
+    """Placeholder text in anything visitors can see (published data only)."""
+    return published_hits(PLACEHOLDER)
+
+
+def claim_hits():
+    """Unverified-looking claims (R26) in published content, plus any
+    testimonials visitors can see — reviews must be genuine (consumer law)."""
+    from .models import BlogPost, ComponentData, ContentPage, DynamicSection
+    hits = [h for h in published_hits(CLAIMS, whole=True) if "testimonial" not in h["where"].lower()]
+    for row in ComponentData.objects.all():
+        data = row.data or {}
+        if not data.get("_hidden") and any(isinstance(v, list) and v for k, v in data.items() if "testimonial" in k.lower()):
+            hits.append({"where": f"block “{row.name}”", "text": "testimonials are visible"})
+    live_pages = set(ContentPage.objects.filter(status="published").values_list("pk", flat=True))
+    live_posts = set(BlogPost.objects.filter(status="published").values_list("pk", flat=True))
+    for section in DynamicSection.objects.filter(status="published", section_type="testimonials").select_related("content_type"):
+        model = section.content_type.model
+        live = (model == "contentpage" and section.object_id in live_pages) or (model == "blogpost" and section.object_id in live_posts)
+        if live and not (section.content or {}).get("_hidden"):
+            hits.append({"where": f"{model} #{section.object_id} section {section.order + 1}", "text": "testimonials are visible"})
+    return hits
+
+
+def published_hits(pattern, whole=False):
+    """Matches of `pattern` in anything visitors can see (published data only).
+    `whole` reports the full string (trimmed) instead of just the match."""
+    from .models import BlogPost, ComponentData, ContentPage, DynamicSection, PageSEO, SiteSettings
+    hits = []
+
+    def scan(where, blob):
+        for path, text in _strings(blob):
+            match = pattern.search(text)
+            if match:
+                shown = (text if len(text) <= 90 else text[:87] + "…") if whole else match.group(0)
+                hits.append({"where": f"{where} → {path}" if path else where, "text": shown})
+
+    for row in ComponentData.objects.all():
+        if not (row.name or "").startswith("form-"):
+            scan(f"block “{row.name}”", row.data)
+    site = SiteSettings.objects.filter(pk=1).first()
+    if site:
+        scan("site settings", {k: v for k, v in (site.data or {}).items() if k not in ("ai", "collections")})
+    for row in PageSEO.objects.all():
+        scan(f"SEO /{row.path}", {k: (row.data or {}).get(k) for k in ("seoTitle", "metaDescription", "social")})
+    live_pages = {p.pk for p in ContentPage.objects.filter(status="published")}
+    live_posts = {p.pk for p in BlogPost.objects.filter(status="published")}
+    for section in DynamicSection.objects.filter(status="published").select_related("content_type"):
+        model = section.content_type.model
+        if (model == "contentpage" and section.object_id in live_pages) or (model == "blogpost" and section.object_id in live_posts):
+            scan(f"{model} #{section.object_id} section {section.order + 1} ({section.section_type})", section.content)
+    for post in BlogPost.objects.filter(status="published"):
+        scan(f"article “{post.slug}”", {"title": post.title, "excerpt": post.excerpt})
+    return hits
+
+
+def run_launch_check():
+    from .models import ComponentData, PageSEO, SiteSettings
+    items = []
+
+    def add(item_id, level, label, detail="", fix="", where=None):
+        items.append({"id": item_id, "level": level, "label": label, "detail": detail, "fix": fix,
+                      **({"where": where} if where else {})})
+
+    site = (SiteSettings.objects.filter(pk=1).first() or SiteSettings()).data or {}
+    seo_defaults = site.get("seoDefaults") or {}
+
+    # 1. The site's own address (canonicals, sitemap, social links).
+    site_url = seo_defaults.get("siteUrl") or ""
+    host = urlparse(site_url).hostname or ""
+    if host in LOCAL_HOSTS:
+        add("site-url", "blocker", "Site URL is not the live domain",
+            f"seoDefaults.siteUrl is “{site_url or 'empty'}” — canonicals, the sitemap and social links would point there.",
+            "Set Settings → SEO defaults → Site URL to https://your-domain.")
+    elif not site_url.startswith("https://"):
+        add("site-url-https", "warning", "Site URL is not https", site_url, "Use the https:// address.")
+
+    # 2. Search engines.
+    if (seo_defaults.get("robots") or {}).get("index") is False:
+        add("robots-off", "blocker", "Search engines are blocked site-wide",
+            "seoDefaults.robots.index is false (a staging setting).", "Turn indexing back on in Settings → SEO defaults.")
+
+    verification = site.get("verification") or {}
+    if not any(str(verification.get(k) or "").strip() for k in ("google", "bing")):
+        add("search-verification", "warning", "Search Console is not verified",
+            "No Google or Bing verification code is set, so you can't see indexing, queries or errors, or submit the sitemap.",
+            "Search Console → Add property → URL prefix → HTML tag: paste it in Settings → Search engine verification "
+            "(or verify the whole domain with a DNS record). Then submit /sitemap.xml. See LAUNCH_GUIDE.md.")
+
+    # 2b. Measurement: without an ID no visit or lead is counted.
+    from .settings_validation import TRACKING_IDS
+    analytics = site.get("analytics") or {}
+    tracking = [key for key, _, _ in TRACKING_IDS if key != "googleAdsLeadLabel" and str(analytics.get(key) or "").strip()]
+    if not tracking and not any(analytics.get(k) for k in ("customHead", "customBodyStart", "customBodyEnd")):
+        add("analytics", "warning", "No analytics is set up",
+            "No tracking ID is set, so visits and leads are not measured anywhere.",
+            "Add a Google Tag Manager or GA4 ID in Settings → Tracking & analytics. See LAUNCH_GUIDE.md.")
+    elif tracking and not analytics.get("consentDefault"):
+        add("consent", "warning", "Consent default is not chosen",
+            "Tracking is on but the Consent Mode default is “Not set”.",
+            "Choose it in Settings → Tracking & analytics: “denied” with a cookie banner where the law requires opt-in (UK/EU).")
+
+    # 2c. Tracking plan, checks and connections (R31–R33).
+    tracking_items(site, add)
+
+    # 3. Leads must reach someone: FormSubmit (Settings → Form notifications)
+    #    is the standard; backend SMTP (FORM_NOTIFICATION_EMAIL) is optional.
+    formsubmit = str((site.get("forms") or {}).get("notifyEmail") or "").strip()
+    recipients = [getattr(settings, "FORM_NOTIFICATION_EMAIL", "") or ""]
+    for row in ComponentData.objects.filter(name__startswith="form-"):
+        recipients.append(((row.data or {}).get("notify") or {}).get("email") or "")
+    smtp_recipient = any(r.strip() for r in recipients)
+    if not formsubmit and not smtp_recipient:
+        add("lead-email", "blocker", "Form submissions notify nobody",
+            "No notification email is set — leads would only sit in the inbox.",
+            "Site tools → Settings → Form notifications: enter the address, then click “Send a test email” and confirm FormSubmit's activation email.")
+    backend = getattr(settings, "EMAIL_BACKEND", "")
+    if smtp_recipient and not formsubmit and any(name in backend for name in DEV_EMAIL_BACKENDS):
+        add("email-backend", "blocker", "Emails are not actually sent",
+            f"Notifications rely on the backend's email, but EMAIL_BACKEND is the "
+            f"{next(n for n in DEV_EMAIL_BACKENDS if n in backend)} backend.",
+            "Use Settings → Form notifications (FormSubmit), or configure SMTP in the backend .env.")
+    if formsubmit and EMAIL_LIKE.match(formsubmit):
+        add("formsubmit-alias", "warning", "Form notification address is public",
+            "FormSubmit uses the address in the page's requests. After activation it emails you a private alias.",
+            "Replace the address with that alias in Settings → Form notifications.")
+
+    # 4. Visitors must see edits.
+    if not getattr(settings, "FRONTEND_REVALIDATE_URL", "") or not getattr(settings, "REVALIDATE_SECRET", ""):
+        add("webhook", "warning", "Cache refresh webhook is off",
+            "Published edits reach visitors only when the page cache expires.",
+            "Set FRONTEND_REVALIDATE_URL and REVALIDATE_SECRET on both sides.")
+    if getattr(settings, "DEBUG", False):
+        add("debug", "warning", "Backend is in DEBUG mode", "", "Set DEBUG=False in production.")
+
+    # 5. Placeholder text visitors would see.
+    hits = placeholder_hits()
+    if hits:
+        add("placeholders", "blocker", f"Placeholder text is published ({len(hits)})",
+            "; ".join(f"{h['text']} in {h['where']}" for h in hits[:8]) + (" …" if len(hits) > 8 else ""),
+            "Replace each with real details (click it on the page).", where=hits)
+
+    # 5b. Claims the owner must confirm are true (R26).
+    claims = claim_hits()
+    if claims:
+        add("claims", "warning", f"Confirm these claims are true ({len(claims)})",
+            "; ".join(f"“{h['text']}” in {h['where']}" for h in claims[:8]) + (" …" if len(claims) > 8 else ""),
+            "Keep only numbers, ratings, credentials, prices and reviews the business can prove; hide or reword the rest.",
+            where=claims)
+
+    # 5c. Article categories: the site's own list, used by every article (R28).
+    from .site_collections import category_issues
+    cats = category_issues()
+    if cats:
+        add("article-categories", "blocker" if any(c["level"] == "blocker" for c in cats) else "warning",
+            f"Article categories need fixing ({len(cats)})", "; ".join(c["text"] for c in cats[:6]) + (" …" if len(cats) > 6 else ""),
+            "Set the categories to the site's real topics in Settings → collections → the blog's fields.category.options, "
+            "then give each article one of them.", where=[{"where": c["id"], "text": c["text"]} for c in cats])
+
+    # 6. Sharing.
+    if not seo_defaults.get("defaultOgImage"):
+        add("og-default", "warning", "No default social image",
+            "Pages without their own image share with no picture.",
+            "Upload a 1200×630 image in Settings → SEO defaults.")
+
+    # 7. Page SEO quality — judged on what search engines actually get (the
+    #    resolved title/description), with the same hard limits as
+    #    frontend-kit/acceptance/site-audit.mjs. (50–60 / 120–160 is the
+    #    ideal the SEO panel coaches towards; these are the fail lines.)
+    from .models import BlogPost, ContentPage
+    from .seo_resolve import resolve_seo
+    paths = {row.path for row in PageSEO.objects.all()}
+    paths |= {p.seo_path or p.path for p in ContentPage.objects.filter(status="published")}
+    paths |= {f"blog/{p.slug}" for p in BlogPost.objects.filter(status="published")}
+    weak = []
+    for path in sorted(paths):
+        resolved = resolve_seo(path)
+        title = resolved.get("fullTitle") or ""
+        desc = resolved.get("description") or ""
+        problems = []
+        if not 25 <= len(title) <= 65:
+            problems.append(f"title {len(title)} chars (25–65)")
+        if not 110 <= len(desc) <= 165:
+            problems.append(f"description {len(desc)} chars (110–165)")
+        if (resolved.get("robots") or {}).get("index") is False:
+            problems.append("noindex")
+        if problems:
+            weak.append({"where": f"/{'' if path == 'home' else path}", "text": ", ".join(problems)})
+    if weak:
+        add("page-seo", "warning", f"{len(weak)} page(s) have weak SEO fields",
+            "; ".join(f"{w['where']}: {w['text']}" for w in weak[:6]), "Open SEO → Ask AI on each page.", where=weak)
+
+    # 8. Internal links (R34), from the last site scan.
+    from .link_audit import latest as latest_links
+    links = latest_links()
+    if links is None:
+        add("internal-links-unscanned", "warning", "Internal links have never been checked",
+            "Without a scan nobody knows which pages are orphaned, buried or linked with “read more”.",
+            "Site tools → SEO → Internal links → Scan site.")
+    elif links["summary"]["fail"]:
+        bad = [i for i in links["issues"] if i["level"] == "fail"]
+        add("internal-links", "warning", f"{len(bad)} internal-link problem(s)",
+            "; ".join(f"{i['path']}: {i['text']}" for i in bad[:6]) + (" …" if len(bad) > 6 else ""),
+            "Site tools → SEO → Internal links: fix each one (the suggestions list ready-made links), then scan again.",
+            where=[{"where": i["path"], "text": i["text"]} for i in bad])
+
+    blockers = [i for i in items if i["level"] == "blocker"]
+    return {"ready": not blockers, "blockers": len(blockers),
+            "warnings": len(items) - len(blockers), "items": items}
+
+
+def tracking_items(site, add):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from .crypto import has_key
+    from .models import TrackingAlert, TrackingConnection, TrackingJob, VerificationRun
+    from .site_facts import get_facts
+    from .tracking_plan import get_plan, validate
+    plan = get_plan()
+    analytics = site.get("analytics") or {}
+    if not plan.get("conversions"):
+        add("tracking-plan", "warning", "No tracking plan yet",
+            "Nothing tells your analytics and ad tools which actions are leads, which offerings people want or who to retarget.",
+            "Site tools → Tracking → Build from library (or Ask AI), review, then Approve.")
+    elif plan.get("status") != "approved":
+        add("tracking-plan", "warning", "Tracking plan is a draft",
+            "Conversions aren't sent until the plan is approved.", "Site tools → Tracking → review the plan, then Approve.")
+    else:
+        facts = get_facts()
+        _, report = validate(plan, facts)
+        if report["gaps"]:
+            add("tracking-incomplete", "warning", f"The tracking plan misses {len(report['gaps'])} thing(s) the site has",
+                "; ".join(report["gaps"][:4]) + (" …" if len(report["gaps"]) > 4 else ""),
+                "Site tools → Tracking → Build from library (or add them by hand), then Approve.")
+        if report["dangling"]:
+            add("tracking-dangling", "warning", f"{len(report['dangling'])} tracking trigger(s) no longer match the site",
+                "; ".join(report["dangling"][:4]), "Site tools → Tracking: update or remove them, then Approve again.")
+        if (plan.get("facts") or {}).get("hash") not in (None, facts.get("hash")):
+            add("tracking-stale", "warning", "The site changed since the tracking plan was approved",
+                "New or removed pages, forms or sections may need conversions.", "Site tools → Tracking → Scan site, review, Approve.")
+        run = VerificationRun.objects.exclude(status__in=("pending", "running")).exclude(trigger="acceptance").first()
+        if not run:
+            add("tracking-checks", "warning", "Tracking has never been checked",
+                "Nobody has confirmed that the conversions actually fire.", "Site tools → Tracking → Checks → Run checks.")
+        elif run.status != "passed":
+            add("tracking-checks", "warning", "Tracking checks are failing",
+                ", ".join((run.summary.get("failing") or []) + (run.summary.get("unplaced") or []))[:300], "Site tools → Tracking → Checks.")
+    conns = list(TrackingConnection.objects.all())
+    if conns and not has_key():
+        add("tracking-key", "blocker", "Tool credentials can't be decrypted",
+            "Tools are connected but TRACKING_SECRET_KEY is not set in the backend environment.",
+            "Set TRACKING_SECRET_KEY (see .env.example) and reconnect the tools.")
+    for c in conns:
+        if c.status == "needs_reauth":
+            add(f"tracking-reauth-{c.tool}", "warning", f"{c.tool} connection needs renewing", c.last_error[:200],
+                "Site tools → Tracking → Tools → Reconnect.")
+    beat = TrackingJob.objects.filter(kind="heartbeat").first()
+    if conns and (not beat or timezone.now() - beat.created_at > timedelta(days=1)):
+        add("tracking-worker", "warning", "The tracking worker isn't running",
+            "Server-side events are sent once; failed sends aren't retried, tools aren't re-synced nightly and old contacts aren't purged.",
+            "Run `manage.py tracking_worker` (systemd/container) or `--once` from cron every minute. See LAUNCH_GUIDE.md.")
+    for alert in TrackingAlert.objects.filter(resolved_at__isnull=True, key__in=("quiet",)):
+        add("tracking-quiet", "warning", "A conversion has gone quiet", alert.message, "Site tools → Tracking → Run checks.")

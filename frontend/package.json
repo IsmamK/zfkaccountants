@@ -13,7 +13,7 @@
     "cms:seed": "node scripts/seed-cms.mjs",
     "check:sections": "node scripts/check-sections.mjs",
     "check:inline": "node scripts/check-inline.mjs src",
-    "cms:kit-sync": "python3 ../dynamic-cms/frontend-kit/sync_kit.py ."
+    "cms:kit-sync": "python3 ../backend/frontend-kit/sync_kit.py ."
   },
   "dependencies": {
     "framer-motion": "^12.23.9",
