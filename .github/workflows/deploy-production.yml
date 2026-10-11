@@ -18,6 +18,7 @@ jobs:
     outputs:
       backend: ${{ steps.detect.outputs.backend }}
       frontend: ${{ steps.detect.outputs.frontend }}
+      infra: ${{ steps.detect.outputs.infra }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,15 +30,19 @@ jobs:
           if [[ "${{ github.event_name }}" == workflow_dispatch || "${{ github.event.before }}" == 0000000000000000000000000000000000000000 ]]; then
             backend=true
             frontend=true
+            infra=true
           else
             changed=$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}')
             backend=false
             frontend=false
-            if grep -Eq '^(backend/|deploy/|\.github/workflows/)' <<< "$changed"; then backend=true; fi
-            if grep -Eq '^(frontend/|deploy/|\.github/workflows/)' <<< "$changed"; then frontend=true; fi
+            infra=false
+            if grep -Eq '^backend/' <<< "$changed"; then backend=true; fi
+            if grep -Eq '^frontend/' <<< "$changed"; then frontend=true; fi
+            if grep -Eq '^(deploy/|\.github/workflows/)' <<< "$changed"; then infra=true; fi
           fi
           echo "backend=$backend" >> "$GITHUB_OUTPUT"
           echo "frontend=$frontend" >> "$GITHUB_OUTPUT"
+          echo "infra=$infra" >> "$GITHUB_OUTPUT"
 
   backend-tests:
     needs: changes
@@ -116,7 +121,7 @@ jobs:
 
   deploy:
     needs: [changes, backend, frontend]
-    if: ${{ always() && needs.changes.result == 'success' && (needs.changes.outputs.backend != 'true' || needs.backend.result == 'success') && (needs.changes.outputs.frontend != 'true' || needs.frontend.result == 'success') && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true') }}
+    if: ${{ always() && needs.changes.result == 'success' && (needs.changes.outputs.backend != 'true' || needs.backend.result == 'success') && (needs.changes.outputs.frontend != 'true' || needs.frontend.result == 'success') && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.infra == 'true') }}
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -159,11 +164,13 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           BUILD_BACKEND: ${{ needs.changes.outputs.backend }}
           BUILD_FRONTEND: ${{ needs.changes.outputs.frontend }}
+          BUILD_INFRA: ${{ needs.changes.outputs.infra }}
           COMMIT_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           args=()
           if [[ "$BUILD_BACKEND" == true ]]; then args+=(--backend "abdullahibnasiddiquie/zfkaccountants-backend:$COMMIT_SHA"); fi
           if [[ "$BUILD_FRONTEND" == true ]]; then args+=(--frontend "abdullahibnasiddiquie/zfkaccountants-frontend:$COMMIT_SHA"); fi
+          if [[ "$BUILD_INFRA" == true ]]; then args+=(--infra); fi
           ssh -i ~/.ssh/zfkaccountants_deploy -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" bash /opt/zfkaccountants/scripts/deploy.sh "${args[@]}"
           ssh -i ~/.ssh/zfkaccountants_deploy -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" bash /opt/zfkaccountants/scripts/install-backup.sh

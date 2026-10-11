@@ -7,17 +7,19 @@ TAGS="$ROOT/compose/image-tags.env"
 PREVIOUS="$ROOT/compose/image-tags.previous.env"
 LOCK="$ROOT/compose/deploy.lock"
 
-usage() { echo "Usage: deploy.sh [--backend IMAGE] [--frontend IMAGE]" >&2; exit 2; }
+usage() { echo "Usage: deploy.sh [--backend IMAGE] [--frontend IMAGE] [--infra]" >&2; exit 2; }
 backend_image=""
 frontend_image=""
+infra=false
 while (($#)); do
   case "$1" in
     --backend) (($# >= 2)) || usage; backend_image=$2; shift 2 ;;
     --frontend) (($# >= 2)) || usage; frontend_image=$2; shift 2 ;;
+    --infra) infra=true; shift ;;
     *) usage ;;
   esac
 done
-[[ -n "$backend_image" || -n "$frontend_image" ]] || usage
+[[ -n "$backend_image" || -n "$frontend_image" || "$infra" == true ]] || usage
 for image in "$backend_image" "$frontend_image"; do
   [[ -z "$image" || "$image" =~ ^abdullahibnasiddiquie/zfkaccountants-(backend|frontend):[0-9a-f]{40}$ ]] || { echo "Invalid immutable image reference: $image" >&2; exit 2; }
 done
@@ -47,7 +49,7 @@ on_error() {
 trap on_error ERR
 compose config --quiet
 DOCKER_CONFIG="$HOME/.docker-zfkaccountants" compose pull postgres redis backend frontend tracking-worker
-compose up -d postgres redis
+compose up -d --wait --wait-timeout 180 postgres redis
 bash "$ROOT/scripts/backup.sh"
 compose run --rm --no-deps backend python manage.py migrate --noinput
 compose run --rm --no-deps backend python manage.py collectstatic --noinput
