@@ -1,0 +1,52 @@
+{
+    "path": "legal",
+    "title": "Legal Information",
+    "page_type": "generic",
+    "seo": {
+        "title": "Privacy, Terms & Cookie Policy",
+        "description": "How ZFK Accountants collects and uses personal data, the terms for using this website, and how cookies are used."
+    },
+    "sections": [
+        {
+            "section_type": "hero",
+            "content": {
+                "eyebrow": "Legal",
+                "heading": "Privacy, terms & cookie policy",
+                "description": "Our privacy policy, website terms of use and cookie policy."
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "anchor": "privacy",
+                "heading": "Privacy Policy",
+                "content": "ZFK Accountants is the controller of the personal data described in this policy.\n\nWe collect the details you give us through our forms (such as your name, email address, phone number and enquiry) and the information needed to provide accounting and tax services.\n\nWe use this information to respond to enquiries, provide our services, meet our legal obligations and, where you have agreed, keep you informed. Our lawful bases are contract, legal obligation, legitimate interests and consent.\n\nWhen you send an enquiry we keep a record of it, together with which of our pages you looked at during that visit, how you found us (for example a search engine or an advert) and your approximate location (town or region). This helps us answer you and understand which services people are looking for. We keep enquiry records for up to 24 months after our last contact with you, unless you become a client.\n\nWe only send you marketing, or include you in audiences for our online advertising, if you tick the box to hear from us. You can change your mind at any time.\n\nWe share data only where necessary: with HMRC and Companies House when we file on your behalf, and with service providers who process it on our behalf under contract. We keep client records for at least five years after our relationship ends, as required by law.\n\nUnder UK GDPR you can ask to access, correct, delete or restrict the use of your data, object to processing, and request a copy of it. Contact us through the booking form on our contact page. You can also complain to the Information Commissioner's Office at ico.org.uk."
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "anchor": "terms",
+                "heading": "Terms of Use",
+                "content": "This website is provided by ZFK Accountants for general information. The content is not personal financial, tax or legal advice, and you should not act on it without speaking to us about your circumstances.\n\nWe aim to keep information accurate and up to date but make no guarantee that it is complete or current. Tax rules and thresholds change regularly.\n\nThe content and design of this website belong to ZFK Accountants and may not be copied without permission. Links to other websites are provided for convenience; we are not responsible for their content.\n\nThese terms are governed by the law of England and Wales. Our engagement letter sets out the terms of any services we provide to you."
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "anchor": "cookies",
+                "heading": "Cookie Policy",
+                "content": "This website uses a small number of necessary cookies so it works: for example, to remember your cookie choices and to keep our staff signed in when they update content.\n\nWith your consent, we also use analytics cookies to understand how the site is used, and marketing cookies to measure our advertising and to show our adverts to people who have visited. We don't set these until you agree in our cookie banner.\n\nYou can change your choice at any time with “Cookie settings” at the bottom of every page, or block and delete cookies in your browser settings. Doing so will not stop you browsing this website."
+            }
+        },
+        {
+            "section_type": "cta",
+            "content": {
+                "heading": "Questions about these policies?",
+                "description": "Book a free consultation using our booking form and we'll be happy to help.",
+                "button_text": "Book a Consultation",
+                "button_href": "/contact"
+            }
+        }
+    ]
+}

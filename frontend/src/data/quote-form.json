@@ -1,0 +1,106 @@
+{
+    "fields": [
+        {
+            "name": "name",
+            "type": "text",
+            "label": "Your name",
+            "placeholder": "Your name *",
+            "required": true,
+            "width": "half",
+            "help": "",
+            "options": []
+        },
+        {
+            "name": "email",
+            "type": "email",
+            "label": "Email address",
+            "placeholder": "Email address *",
+            "required": true,
+            "width": "half",
+            "help": "",
+            "options": []
+        },
+        {
+            "name": "business_type",
+            "type": "select",
+            "label": "Business type",
+            "placeholder": "Business type *",
+            "required": true,
+            "width": "half",
+            "help": "",
+            "options": ["Limited company", "Sole trader", "Partnership", "Landlord", "Individual", "Other"]
+        },
+        {
+            "name": "phone",
+            "type": "tel",
+            "label": "Phone number",
+            "placeholder": "Phone (only if you'd like a call)",
+            "required": false,
+            "width": "half",
+            "help": "",
+            "options": []
+        },
+        {
+            "name": "services",
+            "type": "checkboxes",
+            "label": "Services you're interested in",
+            "placeholder": "",
+            "required": true,
+            "width": "full",
+            "help": "",
+            "options": ["Quarterly VAT returns", "Monthly payroll", "Annual accounts & Corporation Tax", "Self Assessment"]
+        },
+        {
+            "name": "preferred_date",
+            "type": "date",
+            "label": "Preferred date",
+            "placeholder": "Preferred date *",
+            "required": true,
+            "width": "half",
+            "help": "",
+            "options": []
+        },
+        {
+            "name": "preferred_time",
+            "type": "select",
+            "label": "Preferred time",
+            "placeholder": "Preferred time *",
+            "required": true,
+            "width": "half",
+            "help": "",
+            "options": ["Morning", "Afternoon"]
+        },
+        {
+            "name": "meeting",
+            "type": "radio",
+            "label": "How would you like to meet?",
+            "placeholder": "",
+            "required": true,
+            "width": "full",
+            "help": "",
+            "default": "Video call",
+            "options": ["Video call", "Phone call"]
+        },
+        {
+            "name": "message",
+            "type": "textarea",
+            "label": "About your business",
+            "placeholder": "Anything we should know before the call? (optional)",
+            "required": false,
+            "width": "full",
+            "help": "",
+            "options": []
+        }
+    ],
+    "submitText": "Book My Free Consultation",
+    "successMessage": "Thank you. We'll email you within one working day to confirm your consultation and send the call details.",
+    "successTitle": "Consultation requested",
+    "resetText": "Book another consultation",
+    "errorMessage": "Please check the highlighted fields and try again.",
+    "privacyNote": "Free and no obligation. Your details are kept secure and never shared.",
+    "honeypotField": "website",
+    "consent": {
+        "required": false,
+        "text": "I agree to be contacted about my enquiry."
+    }
+}

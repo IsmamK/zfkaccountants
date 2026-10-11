@@ -1,0 +1,164 @@
+{
+    "browseEyebrow": "Browse by topic",
+    "browseTitle": "Choose a category",
+    "browseTitleSecondLine": "to get started",
+    "categories": [
+        {
+            "name": "General",
+            "icon": "general",
+            "desc": "Getting started and pricing",
+            "questions": [
+                {
+                    "q": "Do I need an accountant?",
+                    "a": "An accountant helps you stay compliant, avoid penalties, meet every deadline and make better financial decisions, so you can spend your time running your business."
+                },
+                {
+                    "q": "Which services do you offer?",
+                    "a": "We provide quarterly VAT returns, monthly payroll, annual accounts and Corporation Tax returns, and Self Assessment tax returns for UK businesses and individuals."
+                },
+                {
+                    "q": "How much do your services cost?",
+                    "a": "Every business is different, so we don't publish fixed prices. After a free consultation we send you a clear quote based on exactly what you need, agreed before any work starts."
+                },
+                {
+                    "q": "What affects the price?",
+                    "a": "Mainly the size and complexity of your business: the number of transactions, how many people you pay, your VAT scheme, the state of your records and how many services you need."
+                },
+                {
+                    "q": "How do I switch to ZFK Accountants?",
+                    "a": "We contact your previous accountant, collect the records we need and manage the handover, so your deadlines and filings carry on without a gap."
+                }
+            ]
+        },
+        {
+            "name": "Working Online",
+            "icon": "online",
+            "desc": "Booking, calls and documents",
+            "questions": [
+                {
+                    "q": "Do I need to visit an office?",
+                    "a": "No. We work entirely online. Consultations happen by video call, documents are shared securely online and you approve everything digitally."
+                },
+                {
+                    "q": "Do you work with clients across the UK?",
+                    "a": "Yes. Because everything is online, we work with businesses and individuals anywhere in the UK."
+                },
+                {
+                    "q": "How do I book a consultation?",
+                    "a": "Use the booking form on our contact page to choose a date and time that suits you. We'll email you within one working day to confirm and send the call details."
+                },
+                {
+                    "q": "Is the consultation really free?",
+                    "a": "Yes. The first consultation is free and there is no obligation. It's a chance to talk through your needs before we send a quote."
+                },
+                {
+                    "q": "How do I share my documents?",
+                    "a": "We share a secure online space for your records, or connect to your cloud accounting software, so nothing needs to be posted or emailed unprotected."
+                }
+            ]
+        },
+        {
+            "name": "Data & Security",
+            "icon": "compliance",
+            "desc": "How we keep your records safe",
+            "questions": [
+                {
+                    "q": "How is my information protected?",
+                    "a": "Your records are kept in secure, access-controlled cloud storage and used only to provide the services you've asked us for. We never sell or share them for marketing."
+                }
+            ]
+        },
+        {
+            "name": "VAT",
+            "icon": "vat",
+            "desc": "Quarterly VAT returns",
+            "questions": [
+                {
+                    "q": "Do I need to register for VAT?",
+                    "a": "You must register if your VAT-taxable turnover goes over £90,000 in any rolling twelve months, or you expect it to in the next thirty days. You can also register voluntarily."
+                },
+                {
+                    "q": "What is Making Tax Digital?",
+                    "a": "Making Tax Digital requires VAT-registered businesses to keep digital records and submit VAT returns through compatible software."
+                },
+                {
+                    "q": "How often are VAT returns due?",
+                    "a": "Most businesses file a VAT return every quarter. Each return and payment is usually due one month and seven days after the end of the VAT period."
+                },
+                {
+                    "q": "Can you submit my VAT returns?",
+                    "a": "Yes. We prepare, review and submit your quarterly VAT returns through Making Tax Digital, and you approve each one before it is filed."
+                }
+            ]
+        },
+        {
+            "name": "Payroll",
+            "icon": "payroll",
+            "desc": "Monthly payroll and RTI",
+            "questions": [
+                {
+                    "q": "Can you run my monthly payroll?",
+                    "a": "Yes. We run payroll every month, produce payslips, send Real Time Information to HMRC and tell you what PAYE to pay and when."
+                },
+                {
+                    "q": "Can you run payroll for just me as a director?",
+                    "a": "Yes. Many limited company directors take a salary through PAYE. We run it monthly and keep it in line with your wider tax position."
+                },
+                {
+                    "q": "Do you handle workplace pensions?",
+                    "a": "Yes. We assess staff for auto-enrolment and calculate pension contributions every pay run."
+                },
+                {
+                    "q": "Can you take over from my current payroll provider?",
+                    "a": "Yes. We collect your year-to-date figures and employee details so the switch happens with no break in pay."
+                }
+            ]
+        },
+        {
+            "name": "Annual Accounts & Corporation Tax",
+            "icon": "company",
+            "desc": "Yearly company filings",
+            "questions": [
+                {
+                    "q": "What are annual accounts?",
+                    "a": "Annual accounts are statutory financial statements filed with Companies House and used to calculate your company's Corporation Tax."
+                },
+                {
+                    "q": "When do I need to file my accounts?",
+                    "a": "Most private limited companies must file annual accounts within nine months of the end of their financial year."
+                },
+                {
+                    "q": "When is Corporation Tax due?",
+                    "a": "For most small and medium companies, Corporation Tax is due nine months and one day after the end of the accounting period, and the CT600 return twelve months after it."
+                },
+                {
+                    "q": "Can you prepare my Corporation Tax return?",
+                    "a": "Yes. We prepare your accounts and CT600 together, calculate the tax due and file both on time."
+                }
+            ]
+        },
+        {
+            "name": "Self Assessment",
+            "icon": "personal",
+            "desc": "Yearly personal tax returns",
+            "questions": [
+                {
+                    "q": "Who needs to complete a Self Assessment?",
+                    "a": "Usually sole traders, partners, landlords, company directors with untaxed income such as dividends, and anyone with other untaxed income or gains."
+                },
+                {
+                    "q": "When is the Self Assessment deadline?",
+                    "a": "Online returns are due by 31 January after the end of the tax year, which is also when any tax owed must be paid."
+                },
+                {
+                    "q": "Can you help reduce mistakes on my tax return?",
+                    "a": "Yes. We check your figures carefully, claim the allowances and expenses you're entitled to and file your return correctly and on time."
+                },
+                {
+                    "q": "What records should I keep?",
+                    "a": "Keep records of your income, expense receipts, bank statements and any documents relating to your tax position, usually for at least five years after the filing deadline."
+                }
+            ]
+        }
+    ]
+}

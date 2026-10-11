@@ -1,0 +1,4 @@
+# dynamic-cms is its own repository (github main branch)
+/dynamic-cms/
+.DS_Store
+.gates/

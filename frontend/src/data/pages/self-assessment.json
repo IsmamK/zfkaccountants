@@ -1,0 +1,98 @@
+{
+    "path": "services/self-assessment",
+    "title": "Self Assessment Tax Returns",
+    "page_type": "service",
+    "seo": {
+        "title": "Self Assessment Tax Return Accountant | Online",
+        "description": "Online Self Assessment tax returns for sole traders, landlords, company directors and individuals, prepared carefully and filed before the HMRC deadline."
+    },
+    "sections": [
+        {
+            "section_type": "hero",
+            "content": {
+                "eyebrow": "Self Assessment",
+                "heading": "Self Assessment tax returns, without the stress.",
+                "description": "Once a year we prepare and file your Self Assessment tax return: working out what you owe, claiming the expenses and allowances you are entitled to, and submitting to HMRC well before 31 January.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Read our Self Assessment guide",
+                "secondary_href": "/blog/self-assessment-tax-returns",
+                "highlights_title": "At a glance",
+                "highlights": [
+                    { "label": "How often", "value": "Once a year, for each tax year" },
+                    { "label": "Who it's for", "value": "Sole traders, landlords, directors and individuals" },
+                    { "label": "How we work", "value": "100% online, filed directly with HMRC" },
+                    { "label": "Pricing", "value": "A tailored quote after your free consultation" }
+                ]
+            }
+        },
+        {
+            "section_type": "features",
+            "content": {
+                "heading": "What's included",
+                "items": [
+                    { "icon": "✓", "title": "Tax return preparation", "description": "Your SA100 return prepared from your income, expenses and supporting records." },
+                    { "icon": "✓", "title": "Online filing with HMRC", "description": "Submitted electronically, well before the 31 January deadline." },
+                    { "icon": "✓", "title": "Tax calculation", "description": "What you owe, including any payments on account, explained before you approve." },
+                    { "icon": "✓", "title": "Expenses and allowances", "description": "Allowable expenses and reliefs claimed so you don't pay more tax than you should." },
+                    { "icon": "✓", "title": "HMRC registration", "description": "Registration for Self Assessment if you're filing for the first time." },
+                    { "icon": "✓", "title": "Payment reminders", "description": "Clear reminders of your 31 January and 31 July payment dates." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Who it's for",
+                "heading": "Do you need to file a Self Assessment return?",
+                "content": "Self Assessment is how HMRC collects Income Tax on income that isn't taxed at source. If any of the following apply to you, you will usually need to file a tax return each year:\n\n- You are self-employed with trading income over £1,000\n- You are a partner in a business partnership\n- You receive rental income from property\n- You are a company director with income not taxed through PAYE, such as dividends\n- You or your partner earn over £60,000 and receive Child Benefit\n- You have capital gains, foreign income or other untaxed income\n\nWe handle the whole return online. You share your figures and records digitally, we prepare the return, and you approve it before we submit it to HMRC."
+            }
+        },
+        {
+            "section_type": "steps",
+            "content": {
+                "heading": "How it works, fully online",
+                "items": [
+                    { "title": "Book a free consultation", "description": "A short video call about your income sources, your previous returns and what has changed this year." },
+                    { "title": "Share your records", "description": "Upload your income details, expenses and statements securely online. We send you a simple checklist." },
+                    { "title": "We prepare and explain", "description": "We complete your return, calculate your tax and talk you through the result and payment dates." },
+                    { "title": "You approve, we file", "description": "Once you approve, we submit your return to HMRC and confirm it has been received." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Deadlines and records",
+                "heading": "Self Assessment deadlines and what we need",
+                "content": "The tax year runs from 6 April to 5 April. If you are filing for the first time, you must register for Self Assessment by 5 October after the end of the tax year. Online returns are due by 31 January, which is also when any tax owed must be paid. Many people also make payments on account on 31 January and 31 July.\n\nFrom April 2026, sole traders and landlords with qualifying income over £50,000 must also follow Making Tax Digital for Income Tax, keeping digital records and sending quarterly updates. The threshold falls to £30,000 from April 2027. We can help you prepare.\n\nTo prepare your return we will usually need:\n- Your income from self-employment, property, dividends or other sources\n- Records of business or property expenses\n- P60 or P45 if you were also employed\n- Details of pension contributions, Gift Aid donations and any capital gains"
+            }
+        },
+        {
+            "section_type": "faq",
+            "content": {
+                "heading": "Self Assessment questions",
+                "items": [
+                    { "question": "When is the Self Assessment deadline?", "answer": "Online returns for a tax year ending 5 April are due by 31 January the following year, and any tax owed must be paid by the same date." },
+                    { "question": "What happens if I file late?", "answer": "HMRC charges an initial £100 penalty for a late return, with further penalties and interest the longer it is outstanding. We aim to file well before the deadline." },
+                    { "question": "What expenses can I claim?", "answer": "It depends on your income. Self-employed people and landlords can usually claim costs incurred wholly and exclusively for the business. We review your expenses and claim what is allowable." },
+                    { "question": "What are payments on account?", "answer": "If your tax bill is over £1,000, HMRC usually asks for advance payments towards next year's bill on 31 January and 31 July. We explain these clearly so they are not a surprise." },
+                    { "question": "Does Making Tax Digital affect me?", "answer": "From April 2026 it applies to sole traders and landlords with qualifying income over £50,000, and from April 2027 to those over £30,000. We can check whether it applies to you." },
+                    { "question": "How much does a tax return cost?", "answer": "We quote after a free consultation. The price depends on your income sources, how many properties or businesses you have and the state of your records." },
+                    { "question": "Do I need to meet you in person?", "answer": "No. We work entirely online: consultations by video call, documents shared digitally and your return approved by you before we file it." }
+                ]
+            }
+        },
+        {
+            "section_type": "cta",
+            "content": {
+                "heading": "Get your tax return done properly",
+                "description": "Prepared carefully, explained clearly and filed before the deadline. Start with a free consultation.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Explore all services",
+                "secondary_href": "/services"
+            }
+        }
+    ]
+}

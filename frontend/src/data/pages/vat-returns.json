@@ -1,0 +1,98 @@
+{
+    "path": "services/vat-returns",
+    "title": "Quarterly VAT Returns",
+    "page_type": "service",
+    "seo": {
+        "title": "Quarterly VAT Returns Accountant | Making Tax Digital",
+        "description": "Online accountants for quarterly VAT returns: Making Tax Digital submissions, VAT registration and scheme advice for UK businesses, filed on time."
+    },
+    "sections": [
+        {
+            "section_type": "hero",
+            "content": {
+                "eyebrow": "Quarterly VAT Returns",
+                "heading": "Quarterly VAT returns, handled for you.",
+                "description": "We prepare, check and submit your VAT return every quarter through Making Tax Digital compatible software, so your figures are right and HMRC gets them on time, wherever you are in the UK.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Read our VAT guide",
+                "secondary_href": "/blog/vat-returns-made-simple",
+                "highlights_title": "At a glance",
+                "highlights": [
+                    { "label": "How often", "value": "Every quarter, all year round" },
+                    { "label": "Who it's for", "value": "VAT-registered limited companies, sole traders and partnerships" },
+                    { "label": "How we work", "value": "100% online, Making Tax Digital compliant" },
+                    { "label": "Pricing", "value": "A tailored quote after your free consultation" }
+                ]
+            }
+        },
+        {
+            "section_type": "features",
+            "content": {
+                "heading": "What's included",
+                "items": [
+                    { "icon": "✓", "title": "Quarterly VAT returns", "description": "Your return prepared from your records each quarter and submitted to HMRC before the deadline." },
+                    { "icon": "✓", "title": "Making Tax Digital filing", "description": "Submissions through MTD-compatible software, with the digital links HMRC requires." },
+                    { "icon": "✓", "title": "Reconciliation and review", "description": "Sales, purchases and bank transactions matched, and VAT treatment checked before anything is filed." },
+                    { "icon": "✓", "title": "VAT registration", "description": "Registration with HMRC when you pass the threshold, or voluntarily when it benefits your business." },
+                    { "icon": "✓", "title": "Scheme advice", "description": "Standard, Flat Rate or Cash Accounting: we help you choose the scheme that suits how you trade." },
+                    { "icon": "✓", "title": "Deadline tracking", "description": "We track your VAT periods and remind you of the amount due and the payment date." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Who it's for",
+                "heading": "VAT support that fits how you trade",
+                "content": "Most VAT-registered businesses file a VAT return every three months. Each one has to be accurate, submitted through Making Tax Digital compatible software and paid on time, every quarter, year after year. We take that routine off your hands.\n\nWe work with:\n- Limited companies that are VAT registered\n- Sole traders and partnerships approaching or above the VAT threshold\n- Businesses registering for VAT for the first time\n- Businesses that want a second pair of eyes on returns they currently file themselves\n\nBecause we work entirely online, it doesn't matter where in the UK you are. You share your records digitally, we do the work, and you approve every return before it is submitted."
+            }
+        },
+        {
+            "section_type": "steps",
+            "content": {
+                "heading": "How it works, fully online",
+                "items": [
+                    { "title": "Book a free consultation", "description": "A short video call to understand your business, your VAT scheme and your current records." },
+                    { "title": "Connect your records", "description": "Give us access to your accounting software, or share your sales and purchase records securely online." },
+                    { "title": "We prepare and review", "description": "We reconcile your transactions, check the VAT treatment and send you the figures to approve." },
+                    { "title": "We submit to HMRC", "description": "Your return is filed through Making Tax Digital and we confirm the amount due and the payment date." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Deadlines and records",
+                "heading": "VAT deadlines and what we need from you",
+                "content": "You must register for VAT if your VAT-taxable turnover goes over £90,000 in any rolling twelve-month period, or if you expect it to go over that figure in the next thirty days. You can also register voluntarily below the threshold.\n\nA quarterly VAT return is normally due one calendar month and seven days after the end of the VAT period, and payment is due on the same date. HMRC uses a points-based system for late returns and charges interest on late payments, so a reliable routine matters.\n\nEach quarter we will usually need:\n- Access to your accounting software, or your sales and purchase records\n- Your business bank statements for the period\n- Receipts or invoices for larger purchases\n- Details of anything unusual, such as imports, exports or asset purchases"
+            }
+        },
+        {
+            "section_type": "faq",
+            "content": {
+                "heading": "VAT return questions",
+                "items": [
+                    { "question": "Can you take over VAT returns I currently file myself?", "answer": "Yes. We review your recent returns and VAT setup during onboarding, then take over from your next quarter so nothing is missed." },
+                    { "question": "Do I need Making Tax Digital software?", "answer": "Yes. All VAT-registered businesses must keep digital records and file through compatible software. We can recommend options and help you set them up." },
+                    { "question": "Can I register for VAT voluntarily?", "answer": "Yes. Registering voluntarily can let you reclaim VAT on your costs and may suit businesses that mainly sell to other VAT-registered businesses. We will talk through whether it makes sense for you." },
+                    { "question": "What happens if a VAT return is late?", "answer": "HMRC gives penalty points for late returns, leading to a financial penalty once you reach the threshold, and charges interest on late payments. We file on time to help you avoid both." },
+                    { "question": "Which VAT scheme should I use?", "answer": "It depends on your turnover, your costs and how you invoice. We compare the Standard, Flat Rate and Cash Accounting schemes for your business before recommending one." },
+                    { "question": "How much do quarterly VAT returns cost?", "answer": "Every business is different, so we quote after a free consultation. The price depends on things like your number of transactions, your VAT scheme and the state of your records." },
+                    { "question": "Do I need to meet you in person?", "answer": "No. We work entirely online: consultations by video call, records shared digitally and returns approved by you before submission." }
+                ]
+            }
+        },
+        {
+            "section_type": "cta",
+            "content": {
+                "heading": "Hand your VAT returns to us",
+                "description": "Accurate, on time every quarter and fully Making Tax Digital compliant. Start with a free consultation.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Explore all services",
+                "secondary_href": "/services"
+            }
+        }
+    ]
+}

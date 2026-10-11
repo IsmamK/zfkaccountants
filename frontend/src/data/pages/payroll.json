@@ -1,0 +1,98 @@
+{
+    "path": "services/payroll",
+    "title": "Monthly Payroll",
+    "page_type": "service",
+    "seo": {
+        "title": "Monthly Payroll Services for UK Small Businesses",
+        "description": "Online monthly payroll for UK employers: payslips, RTI submissions to HMRC, PAYE, pension auto-enrolment and starters and leavers, run on time."
+    },
+    "sections": [
+        {
+            "section_type": "hero",
+            "content": {
+                "eyebrow": "Monthly Payroll",
+                "heading": "Monthly payroll, run for you.",
+                "description": "We run your payroll every month: payslips for your team, Real Time Information submissions to HMRC, PAYE calculations and pension contributions, all handled online so your people are paid correctly and on time.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Read our payroll guide",
+                "secondary_href": "/blog/payroll-guide-small-business",
+                "highlights_title": "At a glance",
+                "highlights": [
+                    { "label": "How often", "value": "Every month, all year round" },
+                    { "label": "Who it's for", "value": "UK employers, from one director to a growing team" },
+                    { "label": "How we work", "value": "100% online, RTI submitted every pay run" },
+                    { "label": "Pricing", "value": "A tailored quote after your free consultation" }
+                ]
+            }
+        },
+        {
+            "section_type": "features",
+            "content": {
+                "heading": "What's included",
+                "items": [
+                    { "icon": "✓", "title": "Monthly pay runs", "description": "Gross-to-net pay calculated each month, including tax, National Insurance and deductions." },
+                    { "icon": "✓", "title": "Digital payslips", "description": "Clear payslips for every employee, delivered electronically on payday." },
+                    { "icon": "✓", "title": "RTI submissions", "description": "Full Payment Submissions sent to HMRC on or before each payday, plus Employer Payment Summaries when needed." },
+                    { "icon": "✓", "title": "PAYE summary", "description": "A monthly summary of what you owe HMRC and when it is due, so payments are never late." },
+                    { "icon": "✓", "title": "Pension auto-enrolment", "description": "Workplace pension assessments, contribution calculations and the information your pension provider needs." },
+                    { "icon": "✓", "title": "Starters, leavers and year end", "description": "New starter details, P45s for leavers and P60s for your team at the end of each tax year." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Who it's for",
+                "heading": "Payroll that keeps your team and HMRC happy",
+                "content": "As soon as you pay an employee, or yourself as a company director, through PAYE, you take on monthly payroll duties: calculating pay correctly, reporting it to HMRC in real time and paying over tax and National Insurance on time. Mistakes affect your people directly, so getting it right every month matters.\n\nWe run payroll for:\n- Limited companies paying a salary to their directors\n- Small businesses with a handful of employees\n- Growing teams that have outgrown spreadsheets\n- Employers who want to hand payroll over to a specialist\n\nEverything happens online. You tell us about hours, changes, starters and leavers before each pay run, we process it, and you approve it before anyone is paid."
+            }
+        },
+        {
+            "section_type": "steps",
+            "content": {
+                "heading": "How it works, fully online",
+                "items": [
+                    { "title": "Book a free consultation", "description": "A short video call about your team, pay dates, pension scheme and current payroll setup." },
+                    { "title": "Set up or move your payroll", "description": "We register you as an employer if needed, or take over from your current provider with no break in pay." },
+                    { "title": "Send changes each month", "description": "Before each pay run, share hours, bonuses, starters and leavers with us online." },
+                    { "title": "We run payroll and report", "description": "Payslips go out, RTI goes to HMRC and you receive a summary of what to pay and when." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Deadlines and records",
+                "heading": "Payroll deadlines and what we need from you",
+                "content": "Under Real Time Information, employers must report pay to HMRC on or before each payday through a Full Payment Submission. The PAYE and National Insurance you owe is usually due by the 22nd of the following month when paid electronically.\n\nAt the end of each tax year, employees must receive a P60 by 31 May. Employers also have ongoing workplace pension duties under auto-enrolment, including enrolling eligible staff and paying contributions on time.\n\nBefore each monthly pay run we will usually need:\n- Hours worked, overtime, bonuses or commission\n- Details of new starters, including their starter checklist\n- Leaving dates for anyone who has left\n- Any sickness, maternity, paternity or other statutory pay"
+            }
+        },
+        {
+            "section_type": "faq",
+            "content": {
+                "heading": "Payroll questions",
+                "items": [
+                    { "question": "Can you run payroll for just me as a director?", "answer": "Yes. Many limited company directors pay themselves a salary through PAYE. We run it monthly, file RTI and keep it in line with your wider tax planning." },
+                    { "question": "Can you take over from my current payroll provider?", "answer": "Yes. We collect your year-to-date figures and employee details so the switch happens without any break in pay or reporting." },
+                    { "question": "Do you handle workplace pensions?", "answer": "Yes. We assess your staff for auto-enrolment, calculate contributions each pay run and give you the information your pension provider needs." },
+                    { "question": "What is RTI?", "answer": "Real Time Information is how employers report pay to HMRC. A Full Payment Submission is sent on or before each payday, showing what each employee was paid and what was deducted." },
+                    { "question": "Can you pay weekly instead of monthly?", "answer": "Our standard service is monthly payroll. If you need a different pay frequency, mention it when you book and we will discuss what we can offer." },
+                    { "question": "How much does payroll cost?", "answer": "We quote after a free consultation. The price depends mainly on how many people you pay and how much changes from month to month." },
+                    { "question": "Do I need to meet you in person?", "answer": "No. Everything is handled online: consultations by video call, changes shared digitally and payslips delivered electronically." }
+                ]
+            }
+        },
+        {
+            "section_type": "cta",
+            "content": {
+                "heading": "Take payroll off your plate",
+                "description": "Accurate pay, on-time RTI and pensions handled every month. Start with a free consultation.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Explore all services",
+                "secondary_href": "/services"
+            }
+        }
+    ]
+}

@@ -1,0 +1,99 @@
+/* =========================================================================
+   CMS admin styles (only ever rendered for signed-in admins).
+
+   THEME — set these five variables to the site's own palette. Every admin
+   control (bar, panels, outlines, buttons) reads them, so the CMS looks
+   native on each site while its structure stays identical everywhere.
+   ========================================================================= */
+:root {
+    /* Use shades with ≥4.5:1 contrast against white (WCAG AA): admin buttons
+       put white text on --cms-accent, and --cms-accent-strong is used as
+       text on white. Check at https://webaim.org/resources/contrastchecker/ */
+    --cms-accent: #0b7a68;        /* primary admin actions, outlines, focus rings (5.3:1 with white) */
+    --cms-accent-strong: #0a6b5c; /* accent-coloured text on light backgrounds (6.4:1 on white) */
+    --cms-accent-soft: #ecfdf5;   /* accent tint (hover / selected backgrounds) */
+    --cms-bar: #0b1a2e;           /* admin bar and dark panel surfaces */
+    --cms-primary: #123a5c;       /* secondary brand colour: active tabs, admin headings */
+    /* The first section on a page sits under the fixed site header: its tools
+       start this far down so the header never covers them. Set to the
+       header's height (+ a little). */
+    --cms-first-section-tools-top: 88px;
+}
+
+/* ===== Inline editing: click any outlined text and type ===== */
+.cms-editable {
+    outline: 1px dashed color-mix(in srgb, var(--cms-accent) 55%, transparent);
+    outline-offset: 2px;
+    border-radius: 2px;
+    cursor: text;
+    min-width: 1ch;
+    transition: outline-color 0.15s, background-color 0.15s;
+}
+.cms-editable:hover {
+    outline: 2px dashed var(--cms-accent);
+    background-color: color-mix(in srgb, var(--cms-accent) 6%, transparent);
+}
+.cms-editable:focus {
+    outline: 2px solid var(--cms-accent);
+    background-color: color-mix(in srgb, var(--cms-accent) 8%, transparent);
+}
+.cms-editable:empty::before {
+    content: attr(data-placeholder);
+    opacity: 0.45;
+    font-style: italic;
+}
+
+/* ===== The admin layer (components/cms/floating.jsx) =====
+   Every edit tool, the admin bar, menus and panels are drawn here, at the
+   end of <body>: above every site element, at 1:1 scale whatever zoom the
+   site uses, and never taking layout space — editing on/off moves nothing. */
+.cms-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+}
+.cms-layer > * {
+    pointer-events: auto;
+}
+.cms-floating {
+    z-index: 10;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.2;
+}
+
+/* ===== Edit tools never cover the page =====
+   Block pills ("All fields"), list-item tools (↑ ↓ ⧉ ✕) and "Replace image"
+   chips appear only while their own block / item / image is hovered or has
+   keyboard focus. Touch screens (no hover) always show them. */
+.cms-hover-tools {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+:hover > .cms-hover-tools,
+:focus-within > .cms-hover-tools,
+.cms-hover-tools:focus-within {
+    opacity: 1;
+    pointer-events: auto;
+}
+@media (hover: none) {
+    .cms-hover-tools { opacity: 1; pointer-events: auto; }
+}
+
+/* ===== Hidden from visitors (admins see it dimmed while editing) =====
+   Blocks: the block's tool group carries [data-cms-hidden="block"].
+   List items: E.Item's anchor carries [data-cms-hidden="item"].
+   CMS-page sections: the slot itself carries [data-cms-hidden="section"]. */
+:has(> .cms-ui > [data-cms-hidden="block"]),
+:has(> [data-cms-hidden="item"]),
+[data-cms-hidden="section"] {
+    outline: 2px dashed #f59e0b;
+    outline-offset: -2px;
+}
+:has(> .cms-ui > [data-cms-hidden="block"]) > :not(.cms-ui),
+:has(> [data-cms-hidden="item"]) > :not(.cms-ui):not([data-cms-hidden]),
+[data-cms-hidden="section"] > :not(.cms-ui) {
+    opacity: 0.35;
+    filter: grayscale(0.6);
+}

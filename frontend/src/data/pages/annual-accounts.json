@@ -1,0 +1,98 @@
+{
+    "path": "services/annual-accounts",
+    "title": "Annual Accounts & Corporation Tax",
+    "page_type": "service",
+    "seo": {
+        "title": "Annual Accounts & Corporation Tax Returns (CT600)",
+        "description": "Online accountants for limited company annual accounts and CT600 Corporation Tax returns, prepared accurately and filed with Companies House and HMRC on time."
+    },
+    "sections": [
+        {
+            "section_type": "hero",
+            "content": {
+                "eyebrow": "Annual Accounts & Corporation Tax",
+                "heading": "Annual accounts and Corporation Tax, done right.",
+                "description": "Once a year we prepare your limited company's statutory accounts, file them with Companies House, and complete and submit your CT600 Corporation Tax return to HMRC, all online and ahead of the deadlines.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Read our year-end guide",
+                "secondary_href": "/blog/annual-accounts-deadlines-2026",
+                "highlights_title": "At a glance",
+                "highlights": [
+                    { "label": "How often", "value": "Once a year, after your company year end" },
+                    { "label": "Who it's for", "value": "UK limited companies, from contractors to growing firms" },
+                    { "label": "How we work", "value": "100% online, filed with Companies House and HMRC" },
+                    { "label": "Pricing", "value": "A tailored quote after your free consultation" }
+                ]
+            }
+        },
+        {
+            "section_type": "features",
+            "content": {
+                "heading": "What's included",
+                "items": [
+                    { "icon": "✓", "title": "Statutory annual accounts", "description": "Year-end accounts prepared to the required UK standards for your company size." },
+                    { "icon": "✓", "title": "Companies House filing", "description": "Your accounts filed with Companies House before the deadline." },
+                    { "icon": "✓", "title": "CT600 Corporation Tax return", "description": "Your company tax return completed and submitted to HMRC with the required computations." },
+                    { "icon": "✓", "title": "Tax computation", "description": "Profits adjusted for tax, allowances claimed and your Corporation Tax bill calculated." },
+                    { "icon": "✓", "title": "Year-end review", "description": "A plain-English walk through your results, the tax due and the date it must be paid." },
+                    { "icon": "✓", "title": "Deadline tracking", "description": "We track your filing and payment dates so nothing reaches HMRC or Companies House late." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Who it's for",
+                "heading": "Year-end support for UK limited companies",
+                "content": "Every UK limited company must prepare annual accounts and file them with Companies House, and file a Corporation Tax return with HMRC, even if the company made little or no profit. The two are closely linked, so we prepare them together.\n\nWe work with:\n- Owner-managed limited companies and their directors\n- Contractors and consultants trading through their own company\n- Small and growing companies with employees\n- New companies approaching their first year end\n\nWe work entirely online. You share your bookkeeping and bank records digitally, we prepare the accounts and tax return, and you approve both before anything is filed."
+            }
+        },
+        {
+            "section_type": "steps",
+            "content": {
+                "heading": "How it works, fully online",
+                "items": [
+                    { "title": "Book a free consultation", "description": "A short video call about your company, your year end and the state of your records." },
+                    { "title": "Share your records", "description": "Give us access to your accounting software, or upload your bank statements and records securely." },
+                    { "title": "We prepare and explain", "description": "We draft your accounts and Corporation Tax return, then talk you through the results and tax due." },
+                    { "title": "You approve, we file", "description": "Once approved, we file with Companies House and HMRC and confirm when your tax must be paid." }
+                ]
+            }
+        },
+        {
+            "section_type": "rich_text",
+            "content": {
+                "eyebrow": "Deadlines and records",
+                "heading": "Year-end deadlines and what we need from you",
+                "content": "A private limited company normally has nine months after the end of its financial year to file annual accounts with Companies House. Corporation Tax for most small and medium companies is due nine months and one day after the end of the accounting period, and the CT600 return is due twelve months after it.\n\nCorporation Tax is charged at 19% on profits up to £50,000 and 25% on profits over £250,000, with marginal relief in between. Missing a deadline can lead to automatic penalties, so we plan your year end well ahead.\n\nTo prepare your accounts we will usually need:\n- Access to your bookkeeping or accounting software\n- Business bank statements for the full year\n- Details of assets bought or sold, loans and director's loan account movements\n- Any invoices owed to you, or bills you owed, at the year end"
+            }
+        },
+        {
+            "section_type": "faq",
+            "content": {
+                "heading": "Annual accounts questions",
+                "items": [
+                    { "question": "Do I need to file accounts if my company made no profit?", "answer": "Yes. Every active limited company must file annual accounts and a Corporation Tax return. Dormant companies have simpler requirements, which we can explain." },
+                    { "question": "When are my annual accounts due?", "answer": "Usually nine months after your company's financial year end for Companies House. We check your exact dates during onboarding and track them for you." },
+                    { "question": "Can you take over from my previous accountant?", "answer": "Yes. We request the information we need from your previous accountant and pick up from your next year end, or sooner if a filing is due." },
+                    { "question": "Do you do my bookkeeping as well?", "answer": "Our annual service works from your bookkeeping records. If your records need tidying before year end, mention it when you book and we will quote for it separately." },
+                    { "question": "Can you help reduce my Corporation Tax?", "answer": "We make sure you claim the allowances and reliefs your company is entitled to, and talk you through options such as pension contributions before your year end." },
+                    { "question": "How much do annual accounts cost?", "answer": "We quote after a free consultation. The price depends on your company's size, the number of transactions and the quality of your records." },
+                    { "question": "Do I need to meet you in person?", "answer": "No. We work entirely online: consultations by video call, records shared digitally and accounts approved by you before filing." }
+                ]
+            }
+        },
+        {
+            "section_type": "cta",
+            "content": {
+                "heading": "Ready to get your year end sorted?",
+                "description": "Accounts and Corporation Tax prepared together, explained clearly and filed on time. Start with a free consultation.",
+                "button_text": "Book a Free Consultation",
+                "button_href": "/contact",
+                "secondary_text": "Explore all services",
+                "secondary_href": "/services"
+            }
+        }
+    ]
+}
