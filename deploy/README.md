@@ -14,7 +14,9 @@ GitHub repository secrets: `DOCKER_HUB_USERNAME`, `DOCKER_HUB_PAT`, `VPS_HOST`, 
 
 ## Releases
 
-Push to `production` or run the workflow manually. The workflow builds changed images, pushes SHA tags, bootstraps project paths when absent, copies configuration, then runs `deploy.sh` under a VPS `flock` lock. The script validates Compose, pulls images, backs up data, runs migrations and static collection, restarts application services, and checks loopback plus public HTTPS health endpoints. A failed migration stops the release. It never runs `down -v` or removes database data.
+Push to `production` or run the workflow manually. The workflow builds changed images, pushes SHA tags, bootstraps project paths when absent, copies configuration, then runs `deploy.sh` under a VPS `flock` lock. The script validates Compose, pulls images, backs up data, runs migrations, installs missing CMS defaults, collects static files, restarts application services, and checks loopback plus public HTTPS health endpoints. A failed migration or seed stops the release. It never runs `down -v` or removes database data.
+
+The backend image receives a seed manifest generated from `frontend/scripts/seed-cms.mjs` and `frontend/src/data/` by CI. After migrations, `manage.py seed_site_defaults` installs the site's settings, quote form, page SEO, six articles, five content pages, and a baseline approved tracking plan. The command is transactional and records `_deployment_seed_version` in site settings. Later releases leave admin edits and deletions alone; a deliberate content upgrade needs a new seed version or data migration. Frontend blocks already render their source defaults until edited in the CMS. No admin password or API token is needed for production seeding.
 
 `image-tags.previous.env` preserves the prior image references. `rollback.sh` swaps to those tags and checks application health. **Database migrations are not automatically reversed**, so a binary rollback may require a forward fix or a separately planned database restore.
 

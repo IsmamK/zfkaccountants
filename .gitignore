@@ -22,3 +22,4 @@ __pycache__/
 *.py[cod]
 *.sqlite3
 *.sqlite3-*
+/backend/api/site_seed.json

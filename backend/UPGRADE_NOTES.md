@@ -1,3 +1,15 @@
+# Upgrade Notes — persistent production CMS defaults
+
+- CI now exports the existing frontend seed data into the backend image.
+  `manage.py seed_site_defaults` runs after migrations, inside the deployment
+  lock and after a database backup. It installs site settings, the quote form,
+  SEO, articles, content pages, and an approved baseline tracking plan on a
+  fresh database. No admin password or API token is needed.
+- A version marker makes later releases no-ops, preserving CMS edits and
+  intentional deletions. Future default-content changes require a new seed
+  version or explicit data migration. The PostgreSQL bind mount preserves data
+  across image updates and schema migrations.
+
 # Upgrade Notes — security: Django 5.2 LTS, patched dependencies, a dependencies gate
 
 ## Production deployment

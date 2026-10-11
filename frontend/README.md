@@ -37,6 +37,10 @@ what is empty, `-- --force` overwrites settings, form and page SEO):
 CMS_EMAIL=you@example.com CMS_PASSWORD=… npm run cms:seed
 ```
 
+Production runs `manage.py seed_site_defaults` automatically after migrations.
+CI generates its manifest with `node scripts/seed-cms.mjs --export-json` from
+the same source data, so production seeding needs no admin credentials.
+
 ## Editing content
 
 Sign in at `/admin/login`, or use "Staff login" in the footer, which brings you

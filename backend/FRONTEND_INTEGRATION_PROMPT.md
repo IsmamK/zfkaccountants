@@ -908,6 +908,11 @@ fills the CMS:
 - the privacy/cookie text: analytics cookies, enquiry records, retention
   (R32/R33; the owner confirms the wording)
 
+For container deployment, the site-specific seed script may export this same
+baseline as JSON for a backend management command run after migrations. It
+must install missing defaults without an admin password and record a version
+so subsequent releases do not restore content an admin edited or deleted.
+
 Then the tracking plan (R31), in the browser as an admin: Site tools →
 Tracking → **Scan site** → **Build from library** (and, if useful, **Ask
 AI**) → review until the panel shows no "Not covered yet" line (every lead
@@ -1369,6 +1374,10 @@ Blog posts mirror all of these under `blog/<slug>/…`.
 | GET | `/robots.txt`, `/sitemap.xml` (backend root) | public | Optional backend-served copies |
 
 ### 6.3 `SiteSettings.data` (validated)
+
+The site-specific deployment seed may add an internal
+`_deployment_seed_version` integer at the top level. The frontend does not
+read or edit it; it prevents later releases from overwriting CMS content.
 
 ```jsonc
 {

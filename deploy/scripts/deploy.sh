@@ -52,6 +52,7 @@ DOCKER_CONFIG="$HOME/.docker-zfkaccountants" compose pull postgres redis backend
 compose up -d --wait --wait-timeout 180 postgres redis
 bash "$ROOT/scripts/backup.sh"
 compose run --rm --no-deps backend python manage.py migrate --noinput
+compose run --rm --no-deps backend python manage.py seed_site_defaults
 compose run --rm --no-deps backend python manage.py collectstatic --noinput
 compose up -d --no-deps backend tracking-worker frontend
 for i in {1..36}; do

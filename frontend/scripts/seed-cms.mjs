@@ -14,6 +14,8 @@
    - Page SEO for every route -> seo/<path>/
    - Built-in articles       -> blog/  (only when the CMS has no posts)
    - Service, legal and testimonials pages -> content/pages/ (src/data/pages)
+   - --export-json writes the same defaults as a backend seed manifest; CI
+     generates it before building the backend image, without admin credentials.
 ========================================= */
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -22,6 +24,7 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const force = process.argv.includes("--force");
+const exportJson = process.argv.includes("--export-json");
 
 // Minimal .env.local / .env loader (no dependency).
 for (const file of [".env.local", ".env"]) {
@@ -42,7 +45,7 @@ const API = `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").repl
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
 const { CMS_EMAIL, CMS_PASSWORD } = process.env;
 
-if (!CMS_EMAIL || !CMS_PASSWORD) {
+if (!exportJson && (!CMS_EMAIL || !CMS_PASSWORD)) {
     console.error("Set CMS_EMAIL and CMS_PASSWORD (a staff account) to seed the CMS.");
     process.exit(1);
 }
@@ -194,7 +197,7 @@ function missingOnly(desired, current) {
 }
 
 async function seedSettings() {
-    const current = await api("settings/site/");
+    const current = exportJson ? {} : await api("settings/site/");
     const desired = {
         organization: {
             name: "ZFK Accountants",
@@ -243,6 +246,7 @@ async function seedSettings() {
         sitemap: { extraPaths: STATIC_ROUTES.map((route) => route.path || "/") },
         collections: COLLECTIONS,
     };
+    if (exportJson) return desired;
     // Without --force only values that are still missing are written — at any
     // depth — so re-running never overwrites what an admin changed, but new
     // keys (e.g. a new seoDefaults field) still reach existing sites.
@@ -262,12 +266,17 @@ async function seedForm() {
 async function seedPageSeo() {
     const faqs = readJson("src/data/faqs.json");
     const faqItems = faqs.categories.flatMap((c) => c.questions.map(({ q, a }) => ({ q, a })));
+    const exported = {};
     const results = [];
 
     for (const [path, data] of Object.entries(PAGE_SEO)) {
-        const current = await api(`seo/${path}/`);
         const full = { ...data, canonicalSelf: true, robots: { index: true, follow: true }, sitemap: { include: true } };
         if (path === "faqs") Object.assign(full, { faqItems, schema: { builders: ["FAQPage"] } });
+        if (exportJson) {
+            exported[path] = full;
+            continue;
+        }
+        const current = await api(`seo/${path}/`);
         // Without --force, only fill what's missing — never overwrite an admin's edit.
         const body = force ? full : missingOnly(full, current);
         if (!body || !Object.keys(body).length) {
@@ -278,35 +287,37 @@ async function seedPageSeo() {
         results.push(`${path}: ${isEmpty(current) ? "saved" : `filled ${Object.keys(body).join("+")}`}`);
     }
 
-    return results.join(", ");
+    return exportJson ? exported : results.join(", ");
 }
 
 async function seedBlog() {
+    const articles = readArticles();
+    const entries = articles.map((article) => ({
+        slug: article.slug,
+        title: article.title,
+        excerpt: article.description || "",
+        author: article.author || "",
+        status: "published",
+        published_at: parseDisplayDate(article.date),
+        body_mode: "legacy",
+        content: {
+            coverImage: article.image || "",
+            coverImageAlt: article.title,
+            category: article.category || "",
+            readTime: article.read || "",
+            date: article.date || "",
+            goodToKnow: article.goodToKnow || "",
+            sections: article.body || [],
+        },
+    }));
+    if (exportJson) return entries;
     const existing = await api("blog/");
     if ((existing.count ?? existing.length ?? 0) > 0) return `kept (${existing.count ?? existing.length} posts already in the CMS)`;
 
-    const articles = readArticles();
-    for (const article of articles) {
+    for (const entry of entries) {
         await api("blog/", {
             method: "POST",
-            body: {
-                slug: article.slug,
-                title: article.title,
-                excerpt: article.description || "",
-                author: article.author || "",
-                status: "published",
-                published_at: parseDisplayDate(article.date),
-                body_mode: "legacy",
-                content: {
-                    coverImage: article.image || "",
-                    coverImageAlt: article.title,
-                    category: article.category || "",
-                    readTime: article.read || "",
-                    date: article.date || "",
-                    goodToKnow: article.goodToKnow || "",
-                    sections: article.body || [],
-                },
-            },
+            body: entry,
         });
     }
     return `imported ${articles.length} articles`;
@@ -315,10 +326,11 @@ async function seedBlog() {
 async function seedPages() {
     const dir = join(root, "src/data/pages");
     const files = readdirSync(dir).filter((f) => f.endsWith(".json"));
+    const pages = files.map((file) => JSON.parse(readFileSync(join(dir, file), "utf8")));
+    if (exportJson) return pages;
     const results = [];
 
-    for (const file of files) {
-        const page = JSON.parse(readFileSync(join(dir, file), "utf8"));
+    for (const page of pages) {
         let exists = true;
         try {
             await api(`content/pages/${page.path}/`);
@@ -367,6 +379,28 @@ async function seedPages() {
 }
 
 async function main() {
+    if (exportJson) {
+        const form = readJson("src/data/quote-form.json");
+        const manifest = {
+            version: 1,
+            settings: await seedSettings(),
+            form,
+            pageSeo: await seedPageSeo(),
+            blog: await seedBlog(),
+            pages: await seedPages(),
+            // Enough of the rendered-site facts to establish the baseline plan.
+            // Owners can rescan the live site later; the approved plan is never
+            // replaced by subsequent deployments.
+            scan: { pages: [
+                { path: "/", ctas: [{ label: "Book a free consultation", target: "/contact", block: "home-hero" }] },
+                { path: "/services", blocks: [{ name: "services-pricing", heading: "How pricing works" }] },
+                { path: "/contact", forms: [{ name: "quote" }] },
+                { path: "/faqs" },
+            ] },
+        };
+        console.log(JSON.stringify(manifest));
+        return;
+    }
     console.log(`CMS: ${API}`);
     const login = await api("auth/login/", { method: "POST", body: { email: CMS_EMAIL, password: CMS_PASSWORD } });
     token = login.key;
