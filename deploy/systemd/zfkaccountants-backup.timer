@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily ZFK Accountants project backup
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=15m
+Unit=zfkaccountants-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.cache import cache
 from django.test import override_settings
+from django.test import SimpleTestCase
 from django.utils import timezone
 from datetime import timedelta
 
@@ -21,6 +22,16 @@ from .models import (
 )
 
 User = get_user_model()
+
+
+class HealthEndpointTests(SimpleTestCase):
+    def test_liveness_is_public(self):
+        response = self.client.get("/health/live/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+
+    def test_liveness_rejects_post(self):
+        self.assertEqual(self.client.post("/health/live/").status_code, 405)
 
 
 class AdminAuthMixin:

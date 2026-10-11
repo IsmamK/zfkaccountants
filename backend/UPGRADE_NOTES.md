@@ -1,5 +1,12 @@
 # Upgrade Notes — security: Django 5.2 LTS, patched dependencies, a dependencies gate
 
+## Production deployment
+
+Added public liveness and database readiness endpoints outside `/api/` for
+container and reverse-proxy health checks. They return non-success HTTP status
+when unavailable. Production Docker, Compose, Nginx, and CI files live at the
+repository root and under `deploy/`.
+
 **What's new**
 - **Backend on Django 5.2.18 LTS** (5.1 is out of security support), with
   DRF 3.18.3, django-filter 26.2 and django-cors-headers 4.9.0. Pillow

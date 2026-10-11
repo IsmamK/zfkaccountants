@@ -1,0 +1,10 @@
+[Unit]
+Description=ZFK Accountants project database and media backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=abdullah
+Group=abdullah
+ExecStart=/bin/bash /opt/zfkaccountants/scripts/backup.sh

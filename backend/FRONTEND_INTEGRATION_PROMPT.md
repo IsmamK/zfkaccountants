@@ -1253,6 +1253,11 @@ returns 403.
 
 ### 6.2 Endpoints
 
+**Deployment health (outside `/api/`).** `GET /health/live/` returns
+`{"status":"ok"}` when Django serves requests. `GET /health/ready/` returns the
+same body when the database connection succeeds, or HTTP 503 with
+`{"status":"unavailable"}` when it fails. Neither endpoint requires auth.
+
 **Content (upsert, name-keyed).** `GET` of an unknown key returns `200 {}`.
 `PATCH` deep-merges objects and replaces arrays.
 

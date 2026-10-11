@@ -1,5 +1,13 @@
 .DS_Store
 .gates/
+deploy/env/*.env
+deploy/compose/image-tags.env
+deploy/compose/image-tags.previous.env
+*.pem
+*.key
+*.sql
+*.sql.gz
+*.dump
 
 # Local configuration and secrets
 .env
