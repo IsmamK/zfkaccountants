@@ -1537,9 +1537,12 @@ class AiPromptTests(AdminAuthMixin, APITestCase):
         r = self.admin_client.post("/api/ai/page-assist-prompt/", {"path": "services/vat", "sections": {
             "hero": {"label": "Hero", "content": {"title": "VAT returns for Leeds firms"}},
             "faq": {"label": "FAQ", "content": {"items": []}},
+            "footer": {"label": "Footer", "content": {"title": "VAT returns"}, "excludeFromKeywordAudit": True},
         }}, format="json")
         self.assertEqual(r.data["audit"]["percent"], 50)
+        self.assertEqual(r.data["audit"]["total"], 2)
         self.assertIn("faq (FAQ)", r.data["prompt"])
+        self.assertNotIn('"footer"', r.data["prompt"])
         self.assertEqual(self.admin_client.post("/api/ai/page-assist-prompt/", {"sections": {}}, format="json").status_code, 400)
 
     def test_seo_and_keyword_prompts(self):

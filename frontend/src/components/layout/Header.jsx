@@ -42,6 +42,7 @@ export default function Header() {
     const pathname = usePathname();
     const { data, E, editButton, hidden } = useCms("header", defaults, {
         label: "Header & navigation",
+        excludeFromKeywordAudit: true,
         buttonPosition: "left-1/2 top-full mt-2 -translate-x-1/2",
     });
     const navigation = data.navigation;

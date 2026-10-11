@@ -47,7 +47,7 @@ const defaults = {
 };
 
 export default function Footer() {
-    const { data, E, editButton, hidden } = useCms("footer", defaults, { label: "Footer" });
+    const { data, E, editButton, hidden } = useCms("footer", defaults, { label: "Footer", excludeFromKeywordAudit: true });
     const pathname = usePathname() || "/";
     const loginHref = pathname.startsWith("/admin") ? "/admin/login" : `/admin/login?next=${encodeURIComponent(pathname)}`;
 

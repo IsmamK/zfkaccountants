@@ -12,8 +12,8 @@ import { PAGE_ASSIST_RULES, seoChecks } from "@/lib/seoChecks";
 
 /* =========================================
    Whole-page AI assist.
-   Every editable block on the page — useCms blocks AND
-   CMS-page sections — goes into ONE prompt, built by the
+   Page-specific editable blocks — useCms blocks AND
+   CMS-page sections — go into ONE prompt, built by the
    backend (ai/page-assist-prompt/) with a mechanical
    keyword pre-check. Opening the panel builds it; the
    coverage card is LIVE (recomputed from the blocks as
@@ -89,8 +89,8 @@ function PageAssistDrawer({ onClose }) {
     const [error, setError] = useState("");
     const [result, setResult] = useState("");
     const [warnings, setWarnings] = useState("");
-    // Hidden blocks/sections are not on the live page: not audited, not rewritten.
-    const blocks = Object.values(editables).filter((e) => !e.hidden);
+    // Shared blocks belong to every page and must never be rewritten by page assist.
+    const blocks = Object.values(editables).filter((e) => !e.hidden && !e.excludeFromKeywordAudit);
     const built = useRef(false);
 
     const rules = useMemo(() => {
@@ -131,7 +131,9 @@ function PageAssistDrawer({ onClose }) {
         try {
             const current = Object.fromEntries(blocks.map((e) => [e.name, e.data]));
             const data = await apiRequest("ai/normalize/", { method: "POST", body: { kind: "page_assist", raw, current } });
-            const applied = Object.entries(data.applied);
+            // Only apply page-specific ids, even if a stale or malformed AI reply names shared blocks.
+            const allowed = new Set(blocks.map((e) => e.name));
+            const applied = Object.entries(data.applied).filter(([name]) => allowed.has(name));
             applied.forEach(([name, content]) => {
                 const entry = editables[name];
                 entry?.replace(entry.defaults && Object.keys(entry.defaults).length ? mergeDefaults(entry.defaults, content) : content);

@@ -240,6 +240,7 @@ function Field({ field, value, error, onChange, styles, idPrefix }) {
 export default function QuoteForm({ variant = "desktop" }) {
     const { data: definition, E, editButton, hidden } = useCms(`form-${FORM_NAME}`, DEFAULT_QUOTE_FORM, {
         label: "Booking form",
+        excludeFromKeywordAudit: true,
         fields: FIELD_HINTS,
     });
     const styles = STYLES[variant];

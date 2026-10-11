@@ -31,8 +31,8 @@ import { HIDDEN_KEY, isHidden, stripHidden } from "@/lib/visibility";
    options.fields     per-field hints for the All fields panel
                       ("items[].icon": { type: "select", options: [...] })
    options.afterSave(data)  runs after this block is published
-   options.excludeFromKeywordAudit  shared copy (footer, site-wide CTA)
-                      that should not count toward a page's keyword score
+   options.excludeFromKeywordAudit  shared copy (header, footer, site-wide CTA)
+                      excluded from page keyword score and whole-page AI assist
    options.buttonPosition   classes placing the "All fields" pill
    options.hideable         false for blocks that hold shared labels rather
                             than a visible section (no "Hide" toggle)

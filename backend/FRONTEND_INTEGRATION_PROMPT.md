@@ -290,7 +290,9 @@ Every rule is a MUST. Rule numbers are referenced throughout this file.
   `prompts.seo_rule_checks`). The whole-page assist builds its prompt on open,
   shows KEYWORD COVERAGE (%, sentence, a chip per section) and OTHER SEO
   RULES (6 ✓/✕), stays live after Apply, and covers CMS-page sections.
-  Shared blocks pass `excludeFromKeywordAudit: true`.
+  Shared blocks pass `excludeFromKeywordAudit: true`; they are excluded from
+  keyword coverage, whole-page AI prompts, and whole-page Apply. Header,
+  footer, site-wide CTA, shared forms, and cookie banner must carry this flag.
 - **Never:** a rebuilt or "simplified" panel; Ask AI not first; fewer checks;
   coverage that is stale after Apply.
 - **Proven by:** acceptance "SEO panel opens on Ask AI…", "every SEO check is
@@ -1055,7 +1057,8 @@ step is mandatory):
 1. `useCms(name, defaults, { label })`. `name` is kebab-case, unique, and
    descriptive (`home-hero`, `services-process`, `footer`). `defaults` is
    module-level. Shared blocks (header, footer, site-wide CTA) pass
-   `excludeFromKeywordAudit: true`.
+   `excludeFromKeywordAudit: true`. This also protects shared copy from
+   whole-page AI assist; admins can still edit it directly.
 2. **Every** visible string → `<E.Text path>`. Text with line breaks →
    `multiline`. Split styled fragments into separate keys (`title` +
    `titleHighlight`). Never leave literal copy in JSX. `check:inline` enforces

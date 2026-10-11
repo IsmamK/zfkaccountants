@@ -493,11 +493,13 @@ def section_prompt(*, content, section_type="", label="", path="", page_type="",
 # --------------------------------------------------------------- whole page
 
 def page_assist_prompt(*, path, sections, seo=None):
-    """One prompt covering every editable block on a page.
+    """One prompt covering only page-specific editable blocks.
 
     sections: {id: {"label", "content", "excludeFromKeywordAudit"?}}
     Returns (prompt, audit). The reply is {id: content} for changed blocks.
     """
+    sections = {sid: entry for sid, entry in (sections or {}).items()
+                if not isinstance(entry, dict) or not entry.get("excludeFromKeywordAudit")}
     site = site_context()
     seo = seo or {}
     keyword = ((seo.get("keywords") or {}).get("primary") or "").strip()

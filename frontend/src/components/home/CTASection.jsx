@@ -69,6 +69,7 @@ export default function CTASection({ asPage = false }) {
 
     const { data, E, editButton, hidden } = useCms("cta-section", defaults, {
         label: "Book a consultation section",
+        excludeFromKeywordAudit: true,
         fields,
     });
 
