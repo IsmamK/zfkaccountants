@@ -5,7 +5,7 @@ source_file="$ROOT/nginx/zfkaccountants.conf"
 target=/etc/nginx/sites-available/zfkaccountants.conf
 enabled=/etc/nginx/sites-enabled/zfkaccountants.conf
 [[ -s "$source_file" ]] || { echo "Missing Nginx source file" >&2; exit 1; }
-[[ -e /etc/letsencrypt/live/zfkaccountants.com/fullchain.pem ]] || { echo "Certificate missing" >&2; exit 1; }
+sudo test -e /etc/letsencrypt/live/zfkaccountants.com/fullchain.pem || { echo "Certificate missing" >&2; exit 1; }
 backup=$(mktemp /tmp/zfkaccountants-nginx.XXXXXX)
 had_target=false
 if sudo test -e "$target"; then sudo cp "$target" "$backup"; had_target=true; fi

@@ -4,7 +4,7 @@ ROOT=/opt/zfkaccountants
 target=/etc/nginx/sites-available/zfkaccountants.conf
 enabled=/etc/nginx/sites-enabled/zfkaccountants.conf
 
-if [[ ! -e /etc/letsencrypt/live/zfkaccountants.com/fullchain.pem ]]; then
+if ! sudo test -e /etc/letsencrypt/live/zfkaccountants.com/fullchain.pem; then
   sudo install -m 644 "$ROOT/nginx/zfkaccountants-bootstrap.conf" "$target"
   if [[ ! -e "$enabled" ]]; then sudo ln -s "$target" "$enabled"; fi
   sudo nginx -t
