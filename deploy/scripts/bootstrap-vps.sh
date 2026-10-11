@@ -10,7 +10,7 @@ for path in compose env nginx scripts systemd data data/postgres data/media data
 done
 chmod 700 "$ROOT/env" "$ROOT/backups"
 sudo chown 10001:10001 "$ROOT/data/media" "$ROOT/data/static"
-chmod 755 "$ROOT/data/media" "$ROOT/data/static"
+sudo chmod 755 "$ROOT/data/media" "$ROOT/data/static"
 umask 077
 
 secret() { python3 -c 'import secrets; print(secrets.token_urlsafe(48))'; }
