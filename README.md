@@ -37,5 +37,10 @@ moving an existing installation.
 
 ## Repository
 
-Both components are tracked at https://github.com/IsmamK/zfkaccountants.
+Both components are tracked at https://github.com/logicgate1522/zfkaccountants.
 Run Git commands from this project root; `backend/` is a regular directory.
+
+## Deployment guides
+
+- [This project's production deployment](deploy/README.md)
+- [Reusable autonomous deployment agent prompt](docs/UNIVERSAL_PRODUCTION_DEPLOYMENT_AGENT_PROMPT.md)
